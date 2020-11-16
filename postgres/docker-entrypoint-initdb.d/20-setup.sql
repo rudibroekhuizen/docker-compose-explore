@@ -1,19 +1,5 @@
-START TRANSACTION;
+#/bin/bash
+set -e
 
-CREATE TABLE users(
-  id    SERIAL PRIMARY KEY,
-  email VARCHAR(40) NOT NULL UNIQUE
-);
-
-INSERT INTO users(email)
-SELECT
-  'user_' || seq || '@' || (
-    CASE (RANDOM() * 2)::INT
-      WHEN 0 THEN 'gmail'
-      WHEN 1 THEN 'hotmail'
-      WHEN 2 THEN 'yahoo'
-    END
-  ) || '.com' AS email
-FROM GENERATE_SERIES(1, 5) seq;
-
-COMMIT;
+wget -P /tmp https://api.gbif.org/v1/occurrence/download/request/0107080-200613084148143.zip
+unzip /tmp/0107080-200613084148143.zip -d /tmp
