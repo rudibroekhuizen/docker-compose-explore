@@ -1,0 +1,19 @@
+{
+  "name": "psql_connector",
+  "config": {
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+        "tasks.max": "1",
+        "database.hostname": "postgres",
+        "database.port": "5432",
+        "database.user": "postgres",
+        "database.password": "postgres",
+        "database.dbname": "test_db",
+        "database.server.name": "debezium",
+        "database.whitelist": "test_db",
+        "heartbeat.interval.ms": "1000",
+        "table.whitelist": "public.users",
+        "column.blacklist":"tsv",
+        "database.history.kafka.bootstrap.servers": "kafka:9092",
+        "plugin.name": "pgoutput"
+  }
+}
