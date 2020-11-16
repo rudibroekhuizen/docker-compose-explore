@@ -68,8 +68,6 @@ services:
     image: grafana/grafana:7.3.2
     ports:
       - "3000:3000"
-    volumes:
-      - shared-volume:/shared-volume
     environment:
       - GF_INSTALL_PLUGINS=${GRAFANA_INSTALL_PLUGINS}
       - GF_AUTH_DISABLE_LOGIN_FORM=true
