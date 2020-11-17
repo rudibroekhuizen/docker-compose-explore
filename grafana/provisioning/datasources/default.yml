@@ -6,6 +6,7 @@ datasources:
     url: postgres
     database: db1
     user: postgres
+    isDefault: true
     secureJsonData:
       password: postgres
     jsonData:
