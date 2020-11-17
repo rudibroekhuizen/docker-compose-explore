@@ -1,0 +1,395 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 1,
+  "iteration": 1605530865920,
+  "links": [],
+  "panels": [
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 13,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "ant": {
+          "color": "rgb(0, 100, 255)",
+          "delay": 400,
+          "paused": false,
+          "pulseColor": "rgb(0, 0, 0)",
+          "reverse": false,
+          "weight": 5
+        },
+        "heat": {
+          "fitBoundsOnLoad": false,
+          "fitBoundsOnUpdate": false
+        },
+        "hex": {
+          "colorRangeFrom": "#f7fbff",
+          "colorRangeTo": "#ff0000",
+          "opacity": 0.6,
+          "radiusRangeFrom": 5,
+          "radiusRangeTo": 12
+        },
+        "map": {
+          "centerLatitude": 56.17203,
+          "centerLongitude": 10.1865203,
+          "useBoundsInQuery": true,
+          "useCenterFromFirstPos": false,
+          "useCenterFromLastPos": false,
+          "zoom": 3
+        },
+        "marker": {
+          "showOnlyLastMarker": false,
+          "size": 25,
+          "sizeLast": 25,
+          "useSecondaryIconForAllMarkers": false,
+          "useSecondaryIconForLastMarker": false
+        },
+        "viewType": "marker"
+      },
+      "pluginVersion": "7.3.2",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, 100) over() AS clusters\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n)\nSELECT\nclusters,\ncount(clusters) AS cnt,\navg(decimallatitude) AS latitude,\navg(decimallongitude) AS longitude\nFROM a\nGROUP BY 1\nORDER BY 1;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Map",
+      "type": "alexandra-trackmap-panel"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 15,
+        "w": 11,
+        "x": 13,
+        "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 4,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.2",
+      "pointradius": 1,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  count(*), $__time(eventdate)\n  --$__timeGroup(\"date\",'60m')\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n--AND (tsvector @@ websearch_to_tsquery('simple', '$Search') OR NULLIF('$Search', '') IS null)\n--AND (area_id IN ($Area) OR NULLIF(TRIM(CONCAT($Area)), '') IS null)\nGROUP BY 2\nORDER BY 2 ASC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Count",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 6,
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "7.3.2",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT *\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nLIMIT 100\n--AND (tsvector @@ websearch_to_tsquery('simple', '$Search') OR NULLIF('$Search', '') IS null)\n--AND (area_id IN ($Area) OR NULLIF(TRIM(CONCAT($Area)), '') IS null)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Table",
+      "type": "table"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 26,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": 49.196064000723794,
+          "value": 49.196064000723794
+        },
+        "error": null,
+        "hide": 2,
+        "label": null,
+        "name": "minLat",
+        "options": [
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          }
+        ],
+        "query": "1",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": 56.05976947910657,
+          "value": 56.05976947910657
+        },
+        "error": null,
+        "hide": 2,
+        "label": null,
+        "name": "maxLat",
+        "options": [
+          {
+            "selected": false,
+            "text": "2",
+            "value": "2"
+          }
+        ],
+        "query": "2",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": -6.08642578125,
+          "value": -6.08642578125
+        },
+        "error": null,
+        "hide": 2,
+        "label": null,
+        "name": "minLon",
+        "options": [
+          {
+            "selected": false,
+            "text": "3",
+            "value": "3"
+          }
+        ],
+        "query": "3",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": 14.523925781250002,
+          "value": 14.523925781250002
+        },
+        "error": null,
+        "hide": 2,
+        "label": null,
+        "name": "maxLon",
+        "options": [
+          {
+            "selected": false,
+            "text": "4",
+            "value": "4"
+          }
+        ],
+        "query": "4",
+        "skipUrlSync": false,
+        "type": "constant"
+      }
+    ]
+  },
+  "time": {
+    "from": "1947-04-26T14:05:24.000Z",
+    "to": "2019-12-31T23:00:00.000Z"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Explore a GBIF dataset",
+  "uid": "oOYHGFTMz",
+  "version": 19
+}

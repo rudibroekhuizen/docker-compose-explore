@@ -68,6 +68,9 @@ services:
     image: grafana/grafana:7.3.2
     ports:
       - "3000:3000"
+    volumes:
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_INSTALL_PLUGINS=${GRAFANA_INSTALL_PLUGINS}
       - GF_AUTH_DISABLE_LOGIN_FORM=true
