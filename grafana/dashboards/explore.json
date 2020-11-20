@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1605530865920,
+  "iteration": 1605903796063,
   "links": [],
   "panels": [
     {
@@ -79,7 +79,7 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, 100) over() AS clusters\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n)\nSELECT\nclusters,\ncount(clusters) AS cnt,\navg(decimallatitude) AS latitude,\navg(decimallongitude) AS longitude\nFROM a\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n), b AS (\nSELECT\ntime,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 150)) over() AS clusters\nFROM a\n)\nSELECT\nclusters,\navg(decimallatitude) AS latitude,\navg(decimallongitude) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "select": [
             [
@@ -254,7 +254,8 @@
       },
       "id": 6,
       "options": {
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": []
       },
       "pluginVersion": "7.3.2",
       "targets": [
@@ -263,7 +264,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT *\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nLIMIT 100\n--AND (tsvector @@ websearch_to_tsquery('simple', '$Search') OR NULLIF('$Search', '') IS null)\n--AND (area_id IN ($Area) OR NULLIF(TRIM(CONCAT($Area)), '') IS null)",
+          "rawSql": "SELECT *\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nORDER BY eventdate DESC\nLIMIT 100\n--AND (tsvector @@ websearch_to_tsquery('simple', '$Search') OR NULLIF('$Search', '') IS null)\n--AND (area_id IN ($Area) OR NULLIF(TRIM(CONCAT($Area)), '') IS null)",
           "refId": "A",
           "select": [
             [
@@ -300,8 +301,8 @@
       {
         "current": {
           "selected": false,
-          "text": 49.196064000723794,
-          "value": 49.196064000723794
+          "text": 51.517288954651875,
+          "value": 51.517288954651875
         },
         "error": null,
         "hide": 2,
@@ -321,8 +322,8 @@
       {
         "current": {
           "selected": false,
-          "text": 56.05976947910657,
-          "value": 56.05976947910657
+          "text": 52.39068726147955,
+          "value": 52.39068726147955
         },
         "error": null,
         "hide": 2,
@@ -342,8 +343,8 @@
       {
         "current": {
           "selected": false,
-          "text": -6.08642578125,
-          "value": -6.08642578125
+          "text": 3.0899047851562504,
+          "value": 3.0899047851562504
         },
         "error": null,
         "hide": 2,
@@ -363,8 +364,8 @@
       {
         "current": {
           "selected": false,
-          "text": 14.523925781250002,
-          "value": 14.523925781250002
+          "text": 5.66619873046875,
+          "value": 5.66619873046875
         },
         "error": null,
         "hide": 2,
@@ -384,12 +385,12 @@
     ]
   },
   "time": {
-    "from": "1947-04-26T14:05:24.000Z",
-    "to": "2019-12-31T23:00:00.000Z"
+    "from": "1779-12-31T23:40:28.000Z",
+    "to": "2020-12-31T23:00:00.000Z"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Explore a GBIF dataset",
   "uid": "oOYHGFTMz",
-  "version": 19
+  "version": 1
 }
