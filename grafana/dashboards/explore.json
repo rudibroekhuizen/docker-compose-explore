@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1605903796063,
+  "iteration": 1605976820556,
   "links": [],
   "panels": [
     {
@@ -301,8 +301,8 @@
       {
         "current": {
           "selected": false,
-          "text": 51.517288954651875,
-          "value": 51.517288954651875
+          "text": 22.268764039073968,
+          "value": 22.268764039073968
         },
         "error": null,
         "hide": 2,
@@ -322,8 +322,8 @@
       {
         "current": {
           "selected": false,
-          "text": 52.39068726147955,
-          "value": 52.39068726147955
+          "text": 74.30735341486249,
+          "value": 74.30735341486249
         },
         "error": null,
         "hide": 2,
@@ -343,8 +343,8 @@
       {
         "current": {
           "selected": false,
-          "text": 3.0899047851562504,
-          "value": 3.0899047851562504
+          "text": -72.24609375000001,
+          "value": -72.24609375000001
         },
         "error": null,
         "hide": 2,
@@ -364,8 +364,8 @@
       {
         "current": {
           "selected": false,
-          "text": 5.66619873046875,
-          "value": 5.66619873046875
+          "text": 92.63671875000001,
+          "value": 92.63671875000001
         },
         "error": null,
         "hide": 2,
