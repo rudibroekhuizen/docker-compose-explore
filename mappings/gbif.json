@@ -1,0 +1,18 @@
+{
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "properties": {
+      "gbifid": {
+        "type": "integer"
+      },
+      "eventdate": {
+        "type": "date"
+      },
+      "location": {
+        "type": "geo_point"
+      }
+    }
+  }
+}
