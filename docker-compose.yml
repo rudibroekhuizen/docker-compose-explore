@@ -1,3 +1,4 @@
+---
 version: "3.4"
 services:
   zookeeper:
@@ -26,11 +27,11 @@ services:
       - kafka
       - elasticsearch
     environment:
-     - BOOTSTRAP_SERVERS=kafka:9092
-     - GROUP_ID=1
-     - CONFIG_STORAGE_TOPIC=my_connect_configs
-     - OFFSET_STORAGE_TOPIC=my_connect_offsets
-     - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
 
   postgres:
     build: ./postgres
@@ -51,11 +52,11 @@ services:
     expose: 
       - "9200"  
     environment:
-      http.host: 0.0.0.0
-      transport.host: 127.0.0.1
-      discovery.type: "single-node"
-      cluster.routing.allocation.disk.threshold_enabled: "false"
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      - http.host=0.0.0.0
+      - transport.host= 127.0.0.1
+      - discovery.type=single-node
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - ES_JAVA_OPTS="-Xms512m -Xmx512m"
 
   kibana:
     image: docker.elastic.co/kibana/kibana-oss:7.6.1
@@ -78,4 +79,4 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_USERS_ALLOW_SIGN_UP=false
-
+...
