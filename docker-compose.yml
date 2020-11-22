@@ -56,7 +56,7 @@ services:
       - transport.host= 127.0.0.1
       - discovery.type=single-node
       - cluster.routing.allocation.disk.threshold_enabled=false
-      - ES_JAVA_OPTS="-Xms512m -Xmx512m"
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
 
   kibana:
     image: docker.elastic.co/kibana/kibana-oss:7.6.1
