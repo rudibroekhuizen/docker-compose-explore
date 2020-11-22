@@ -5,7 +5,7 @@
   "mappings": {
     "properties": {
       "gbifid": {
-        "type": "integer"
+        "type": "long"
       },
       "eventdate": {
         "type": "date"
