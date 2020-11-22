@@ -584,6 +584,6 @@ UPDATE explore.gbif SET geom = ST_SetSRID(ST_MakePoint(decimallongitude,decimall
 
 -- Add field 'location' to be used in Elasticsearch
 ALTER TABLE explore.gbif ADD COLUMN location text DEFAULT NULL;
-UPDATE explore.gbif SET location = concat_ws(',', "decimalLatitude", "decimalLongitude");
+UPDATE explore.gbif SET location = concat_ws(',', "decimallatitude", "decimallongitude");
 
 COMMIT;
