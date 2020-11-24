@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1605903796063,
+  "iteration": 1606240073875,
   "links": [],
   "panels": [
     {
@@ -60,9 +60,11 @@
           "useBoundsInQuery": true,
           "useCenterFromFirstPos": false,
           "useCenterFromLastPos": false,
-          "zoom": 3
+          "zoom": 3,
+          "zoomToDataBounds": false
         },
         "marker": {
+          "alwaysShowTooltips": false,
           "showOnlyLastMarker": false,
           "size": 25,
           "sizeLast": 25,
@@ -79,7 +81,7 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n), b AS (\nSELECT\ntime,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 150)) over() AS clusters\nFROM a\n)\nSELECT\nclusters,\navg(decimallatitude) AS latitude,\navg(decimallongitude) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n), b AS (\nSELECT\ntime,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 150)) over() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(decimallatitude) AS latitude,\nAVG(decimallongitude) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "select": [
             [
@@ -244,7 +246,20 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gbifid"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": null
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -301,8 +316,8 @@
       {
         "current": {
           "selected": false,
-          "text": 51.517288954651875,
-          "value": 51.517288954651875
+          "text": "42.16340342422403",
+          "value": "42.16340342422403"
         },
         "error": null,
         "hide": 2,
@@ -322,8 +337,8 @@
       {
         "current": {
           "selected": false,
-          "text": 52.39068726147955,
-          "value": 52.39068726147955
+          "text": "66.51326044311188",
+          "value": "66.51326044311188"
         },
         "error": null,
         "hide": 2,
@@ -343,8 +358,8 @@
       {
         "current": {
           "selected": false,
-          "text": 3.0899047851562504,
-          "value": 3.0899047851562504
+          "text": "-114.08203125000001",
+          "value": "-114.08203125000001"
         },
         "error": null,
         "hide": 2,
@@ -364,8 +379,8 @@
       {
         "current": {
           "selected": false,
-          "text": 5.66619873046875,
-          "value": 5.66619873046875
+          "text": "134.29687500000003",
+          "value": "134.29687500000003"
         },
         "error": null,
         "hide": 2,
