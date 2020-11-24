@@ -12,12 +12,12 @@ Copy .env.template to .env:
 cp .env.template .env
 ```
 
-##### Use Grafana dashboard
+#### Use Grafana dashboard
 ```
 docker-compose up -d postgres grafana
 ```
 
-##### Use Grafana and Kibana 
+#### Use Grafana and Kibana 
 
 Set ADVERTISED_HOST_NAME var to your local IP in .env.
 
