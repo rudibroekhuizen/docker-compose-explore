@@ -2,6 +2,11 @@
 
 
 ### Usage
+Clone this repo:
+```
+git clone https://github.com/rudibroekhuizen/docker-compose-explore.git
+```
+
 Copy .env.template to .env:
 ```
 cp .env.template .env
