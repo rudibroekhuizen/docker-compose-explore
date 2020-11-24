@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1606240073875,
+  "iteration": 1606252754022,
   "links": [],
   "panels": [
     {
@@ -407,5 +407,5 @@
   "timezone": "",
   "title": "Explore a GBIF dataset",
   "uid": "oOYHGFTMz",
-  "version": 1
+  "version": 3
 }
