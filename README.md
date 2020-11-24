@@ -1,7 +1,7 @@
 # Explore a GBIF dataset
 
 
-### Usage
+## How to use
 Clone this repo:
 ```
 git clone https://github.com/rudibroekhuizen/docker-compose-explore.git
