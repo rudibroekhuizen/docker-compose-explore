@@ -574,12 +574,16 @@ decimallatitude::float,
 decimallongitude::float
 FROM explore.gbif_raw);
 
--- Add primary key
+-- Add primary key, needed for Debezium to sync table to Elasticsearch
 ALTER TABLE explore.gbif ADD PRIMARY KEY (gbifid);
 
--- Postgis magic
+-- Postgis magic for Grafana Track Map panel
 CREATE EXTENSION postgis;
-ALTER TABLE explore.gbif ADD COLUMN geom geometry(POINT,4326);
+ALTER TABLE explore.gbif ADD COLUMN geom geometry(POINT,4326) DEFAULT NULL;
 UPDATE explore.gbif SET geom = ST_SetSRID(ST_MakePoint(decimallongitude,decimallatitude), 4326);
+
+-- Add field 'location' to be used in Elasticsearch
+ALTER TABLE explore.gbif ADD COLUMN location text DEFAULT NULL;
+UPDATE explore.gbif SET location = concat_ws(',', "decimallatitude", "decimallongitude");
 
 COMMIT;

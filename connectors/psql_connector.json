@@ -7,12 +7,12 @@
         "database.port": "5432",
         "database.user": "postgres",
         "database.password": "postgres",
-        "database.dbname": "test_db",
-        "database.server.name": "debezium",
-        "database.whitelist": "test_db",
+        "database.dbname": "db1",
+        "database.server.name": "db1",
+        "database.whitelist": "db1",
         "heartbeat.interval.ms": "1000",
-        "table.whitelist": "public.users",
-        "column.blacklist":"tsv",
+        "table.whitelist": "explore.gbif",
+        "column.blacklist":"explore.gbif\\.(geom).*",
         "database.history.kafka.bootstrap.servers": "kafka:9092",
         "plugin.name": "pgoutput"
   }
