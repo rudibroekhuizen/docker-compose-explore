@@ -81,7 +81,7 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n), b AS (\nSELECT\ntime,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 150)) over() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(decimallatitude) AS latitude,\nAVG(decimallongitude) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n), b AS (\nSELECT\ntime,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 150)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(decimallatitude) AS latitude,\nAVG(decimallongitude) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "select": [
             [
