@@ -605,6 +605,28 @@ genericname,
 scientificname
 );
 
+-- Create function and trigger to populate geom column
+CREATE OR REPLACE Function explore.update_geom() RETURNS TRIGGER AS 
+$$
+  BEGIN 
+    NEW.geom := ST_SetSRID(ST_Makepoint(NEW.decimallongitude,NEW.decimallatitude),4326);
+    RETURN NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER update_geom BEFORE INSERT OR UPDATE ON explore.gbif FOR EACH ROW EXECUTE PROCEDURE explore.update_geom();
+
+-- Create function and trigger to populate location column
+CREATE OR REPLACE Function explore.update_location() RETURNS TRIGGER AS 
+$$
+  BEGIN 
+    NEW.location := concat_ws(',', NEW.decimallatitude, NEW.decimallongitude);
+    RETURN NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER update_location BEFORE INSERT OR UPDATE ON explore.gbif FOR EACH ROW EXECUTE PROCEDURE explore.update_location();
+
 -- Insert data
 INSERT INTO explore.gbif (SELECT
 gbifid::bigint, 
@@ -636,11 +658,5 @@ decimallatitude::float,
 decimallongitude::float
 FROM explore.gbif_raw
 );
-
--- Create geometry value
-UPDATE explore.gbif SET geom = ST_SetSRID(ST_MakePoint(decimallongitude,decimallatitude), 4326);
-
--- Create location value to be used in Elasticsearch
-UPDATE explore.gbif SET location = concat_ws(',', "decimallatitude", "decimallongitude");
 
 COMMIT;
