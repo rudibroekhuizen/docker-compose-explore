@@ -542,9 +542,93 @@ UPDATE explore.gbif_raw SET "specificepithet" = null WHERE "specificepithet" = '
 UPDATE explore.gbif_raw SET "species" = null WHERE "species" = '';
 UPDATE explore.gbif_raw SET "genericname" = null WHERE "genericname" = '';
 
--- Create table gbif and set datatypes
-CREATE TABLE explore.gbif AS (
-SELECT 
+-- Postgis magic for Grafana Track Map panel
+CREATE EXTENSION postgis;
+
+-- Create table gbif
+CREATE TABLE explore.gbif (
+gbifid bigint PRIMARY KEY,
+eventdate timestamptz,
+year int,
+month int,
+day int,
+catalognumber text,
+occurrenceid text,
+recordedby text,
+sex text,
+lifestage text,
+preparations text,
+locality text,
+stateprovince text,
+countrycode text,
+higherclassification text,
+kingdom text,
+phylum text,
+class text,
+"order" text,
+family text,
+genus text,
+specificepithet text,
+species text,
+genericname text,
+scientificname text,
+decimallatitude float,
+decimallongitude float,
+geom geometry(POINT,4326),
+location text,
+tsv tsvector
+);
+
+-- Create trigger to generate tsvectors on insert
+CREATE TRIGGER create_tsv BEFORE INSERT OR UPDATE
+ON explore.gbif FOR EACH ROW EXECUTE FUNCTION
+tsvector_update_trigger(tsv, 'pg_catalog.simple', 
+catalognumber, 
+occurrenceid, 
+recordedby, 
+sex, 
+lifestage, 
+preparations, 
+locality, 
+stateprovince, 
+countrycode, 
+higherclassification, 
+kingdom, 
+phylum, 
+class, 
+"order", 
+family, 
+genus, 
+specificepithet,
+species,
+genericname,
+scientificname
+);
+
+-- Create function and trigger to populate geom column
+CREATE OR REPLACE Function explore.update_geom() RETURNS TRIGGER AS 
+$$
+  BEGIN 
+    NEW.geom := ST_SetSRID(ST_Makepoint(NEW.decimallongitude,NEW.decimallatitude),4326);
+    RETURN NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER update_geom BEFORE INSERT OR UPDATE ON explore.gbif FOR EACH ROW EXECUTE PROCEDURE explore.update_geom();
+
+-- Create function and trigger to populate location column
+CREATE OR REPLACE Function explore.update_location() RETURNS TRIGGER AS 
+$$
+  BEGIN 
+    NEW.location := concat_ws(',', NEW.decimallatitude, NEW.decimallongitude);
+    RETURN NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER update_location BEFORE INSERT OR UPDATE ON explore.gbif FOR EACH ROW EXECUTE PROCEDURE explore.update_location();
+
+-- Insert data
+INSERT INTO explore.gbif (SELECT
 gbifid::bigint, 
 eventdate::timestamptz,
 year::int,
@@ -572,18 +656,7 @@ genericname,
 scientificname,
 decimallatitude::float,
 decimallongitude::float
-FROM explore.gbif_raw);
-
--- Postgis magic for Grafana Track Map panel
-CREATE EXTENSION postgis;
-ALTER TABLE explore.gbif ADD COLUMN geom geometry(POINT,4326) DEFAULT NULL;
-UPDATE explore.gbif SET geom = ST_SetSRID(ST_MakePoint(decimallongitude,decimallatitude), 4326);
-
--- Add primary key, needed for Debezium to sync table to Elasticsearch
-ALTER TABLE explore.gbif ADD PRIMARY KEY (gbifid);
-
--- Add field 'location' to be used in Elasticsearch
-ALTER TABLE explore.gbif ADD COLUMN location text DEFAULT NULL;
-UPDATE explore.gbif SET location = concat_ws(',', "decimallatitude", "decimallongitude");
+FROM explore.gbif_raw
+);
 
 COMMIT;

@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1606252754022,
+  "iteration": 1606926961083,
   "links": [],
   "panels": [
     {
@@ -55,12 +55,12 @@
           "radiusRangeTo": 12
         },
         "map": {
-          "centerLatitude": 56.17203,
-          "centerLongitude": 10.1865203,
+          "centerLatitude": 0,
+          "centerLongitude": 0,
           "useBoundsInQuery": true,
           "useCenterFromFirstPos": false,
           "useCenterFromLastPos": false,
-          "zoom": 3,
+          "zoom": 2,
           "zoomToDataBounds": false
         },
         "marker": {
@@ -81,7 +81,7 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n), b AS (\nSELECT\ntime,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 150)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(decimallatitude) AS latitude,\nAVG(decimallongitude) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\n), b AS (\nSELECT\ntime,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 150)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(decimallatitude) AS latitude,\nAVG(decimallongitude) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "select": [
             [
@@ -160,7 +160,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  count(*), $__time(eventdate)\n  --$__timeGroup(\"date\",'60m')\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\n--AND (tsvector @@ websearch_to_tsquery('simple', '$Search') OR NULLIF('$Search', '') IS null)\n--AND (area_id IN ($Area) OR NULLIF(TRIM(CONCAT($Area)), '') IS null)\nGROUP BY 2\nORDER BY 2 ASC",
+          "rawSql": "SELECT\n  count(*), $__time(eventdate)\n  --$__timeGroup(\"date\",'60m')\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nGROUP BY 2\nORDER BY 2 ASC",
           "refId": "A",
           "select": [
             [
@@ -279,7 +279,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT *\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nORDER BY eventdate DESC\nLIMIT 100\n--AND (tsvector @@ websearch_to_tsquery('simple', '$Search') OR NULLIF('$Search', '') IS null)\n--AND (area_id IN ($Area) OR NULLIF(TRIM(CONCAT($Area)), '') IS null)",
+          "rawSql": "SELECT *\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nORDER BY eventdate DESC\nLIMIT 100",
           "refId": "A",
           "select": [
             [
@@ -316,8 +316,8 @@
       {
         "current": {
           "selected": false,
-          "text": "42.16340342422403",
-          "value": "42.16340342422403"
+          "text": -66.79190947341796,
+          "value": -66.79190947341796
         },
         "error": null,
         "hide": 2,
@@ -337,8 +337,8 @@
       {
         "current": {
           "selected": false,
-          "text": "66.51326044311188",
-          "value": "66.51326044311188"
+          "text": 66.79190947341796,
+          "value": 66.79190947341796
         },
         "error": null,
         "hide": 2,
@@ -358,8 +358,8 @@
       {
         "current": {
           "selected": false,
-          "text": "-114.08203125000001",
-          "value": "-114.08203125000001"
+          "text": -164.88281250000003,
+          "value": -164.88281250000003
         },
         "error": null,
         "hide": 2,
@@ -379,8 +379,8 @@
       {
         "current": {
           "selected": false,
-          "text": "134.29687500000003",
-          "value": "134.29687500000003"
+          "text": 164.88281250000003,
+          "value": 164.88281250000003
         },
         "error": null,
         "hide": 2,
@@ -396,6 +396,27 @@
         "query": "4",
         "skipUrlSync": false,
         "type": "constant"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "error": null,
+        "hide": 0,
+        "label": "Search",
+        "name": "search",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
     ]
   },
@@ -407,5 +428,5 @@
   "timezone": "",
   "title": "Explore a GBIF dataset",
   "uid": "oOYHGFTMz",
-  "version": 3
+  "version": 1
 }
