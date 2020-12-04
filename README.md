@@ -16,6 +16,8 @@ docker-compose up -d postgres grafana
 Browse to http://localhost:3000/dashboards in your browser.
 
 
+
+
 #### Use Grafana and Kibana 
 
 Set ADVERTISED_HOST_NAME var to your local IP in .env.
