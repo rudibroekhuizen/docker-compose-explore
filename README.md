@@ -31,3 +31,5 @@ When all containers are up:
 ```
 ./start.sh
 ```
+
+Browse to http://localhost:5601 in your browser.
