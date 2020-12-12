@@ -7,29 +7,17 @@ Clone this repo:
 git clone https://github.com/rudibroekhuizen/docker-compose-explore.git
 ```
 
-
-
-#### Use Grafana dashboard
+Start the containers:
 ```
-docker-compose up -d postgres grafana
+docker-compose up -d
 ```
-Browse to http://localhost:3000/dashboards in your browser.
 
+Browse to http://localhost:3000/dashboards in your browser to use the Grafana dashboard.
 
-
-
-#### Use Grafana and Kibana 
-
-Set ADVERTISED_HOST_NAME var to your local IP in .env.
-
-Start containers:
-```
-docker-compose up -d 
-```
 
 When all containers are up:
 ```
-./start.sh
+./sync_to_elasticsearch.sh
 ```
 
-Browse to http://localhost:5601 in your browser.
+Browse to http://localhost:5601 in your browser to use the Kibana dashboard.
