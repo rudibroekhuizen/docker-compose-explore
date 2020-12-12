@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 # create indices with mappings
 curl -i -X PUT -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:9200/db1.explore.gbif -d @mappings/gbif.json
 
