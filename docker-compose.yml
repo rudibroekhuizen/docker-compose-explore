@@ -16,7 +16,7 @@ services:
       - zookeeper
     environment:
       - ZOOKEEPER_CONNECT=zookeeper:2181
-      - ADVERTISED_HOST_NAME=${ADVERTISED_HOST_NAME}        # https://debezium.io/documentation/faq/#how_to_connect_to_kafka_when_using_the_debezium_docker_images
+      - ADVERTISED_HOST_NAME=kafka
 
   connect:
     build: ./debezium-jdbc-es
