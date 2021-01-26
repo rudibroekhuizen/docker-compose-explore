@@ -606,7 +606,7 @@ scientificname
 );
 
 -- Create function and trigger to populate geom column
-CREATE OR REPLACE Function explore.update_geom() RETURNS TRIGGER AS 
+CREATE OR REPLACE function explore.update_geom() RETURNS TRIGGER AS 
 $$
   BEGIN 
     NEW.geom := ST_SetSRID(ST_Makepoint(NEW.decimallongitude,NEW.decimallatitude),4326);
@@ -617,10 +617,12 @@ $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER update_geom BEFORE INSERT OR UPDATE ON explore.gbif FOR EACH ROW EXECUTE PROCEDURE explore.update_geom();
 
 -- Create function and trigger to populate location column
-CREATE OR REPLACE Function explore.update_location() RETURNS TRIGGER AS 
+CREATE OR REPLACE function explore.update_location() RETURNS TRIGGER AS 
 $$
-  BEGIN 
-    NEW.location := concat_ws(',', NEW.decimallatitude, NEW.decimallongitude);
+  BEGIN
+    IF OLD.decimallatitude IS NOT NULL AND OLD.decimallongitude IS NOT NULL THEN
+      NEW.location := concat_ws(',', NEW.decimallatitude, NEW.decimallongitude);
+    END IF;
     RETURN NEW;
   END;
 $$ LANGUAGE 'plpgsql';
