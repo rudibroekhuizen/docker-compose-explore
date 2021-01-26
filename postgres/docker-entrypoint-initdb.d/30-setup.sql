@@ -620,7 +620,7 @@ CREATE TRIGGER update_geom BEFORE INSERT OR UPDATE ON explore.gbif FOR EACH ROW 
 CREATE OR REPLACE function explore.update_location() RETURNS TRIGGER AS 
 $$
   BEGIN
-    IF OLD.decimallatitude IS NOT NULL AND OLD.decimallongitude IS NOT NULL THEN
+    IF NEW.decimallatitude IS NOT NULL AND NEW.decimallongitude IS NOT NULL THEN
       NEW.location := concat_ws(',', NEW.decimallatitude, NEW.decimallongitude);
     END IF;
     RETURN NEW;
