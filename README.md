@@ -20,4 +20,10 @@ When all containers are up:
 ./sync_to_elasticsearch.sh
 ```
 
+
+Import Kibana dashboard:
+```
+./load_kibana_dashboard.sh
+```
+
 Browse to http://localhost:5601 in your browser to use the Kibana dashboard.
