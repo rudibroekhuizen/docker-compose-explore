@@ -15,7 +15,7 @@ docker-compose up -d
 Browse to http://localhost:3000/dashboards in your browser to use the Grafana dashboard.
 
 
-When all containers are up:
+When all containers are up start this script to start sync:
 ```
 ./sync_to_elasticsearch.sh
 ```
