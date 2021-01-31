@@ -12,7 +12,7 @@
         "database.whitelist": "db1",
         "heartbeat.interval.ms": "1000",
         "table.whitelist": "explore.gbif",
-        "column.blacklist":"explore.gbif\\.(geom).*",
+        "column.blacklist":"explore.gbif\\.(geom|tsv).*",
         "database.history.kafka.bootstrap.servers": "kafka:9092",
         "plugin.name": "pgoutput"
   }
