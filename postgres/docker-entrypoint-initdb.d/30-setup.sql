@@ -1,5 +1,8 @@
 START TRANSACTION;
 
+-- Security best practice; avoid creation of objects in schema 'public'
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+
 -- Create schema
 CREATE SCHEMA explore;
 
