@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1619351865642,
+  "iteration": 1619378599641,
   "links": [],
   "panels": [
     {
@@ -54,20 +54,20 @@
           "radiusRangeTo": 12
         },
         "map": {
-          "centerLatitude": 0,
-          "centerLongitude": 0,
+          "centerLatitude": 32,
+          "centerLongitude": 10,
           "tileUrlSchema": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
           "useBoundsInQuery": true,
           "useCenterFromFirstPos": false,
           "useCenterFromLastPos": false,
-          "zoom": 2,
+          "zoom": 1.5,
           "zoomToDataBounds": false
         },
         "marker": {
           "alwaysShowTooltips": false,
           "showOnlyLastMarker": false,
-          "size": 25,
-          "sizeLast": 25,
+          "size": 20,
+          "sizeLast": 20,
           "useSecondaryIconForAllMarkers": false,
           "useSecondaryIconForLastMarker": false
         },
@@ -495,7 +495,7 @@
           "text": "",
           "value": ""
         },
-        "description": null,
+        "description": "Full text search",
         "error": null,
         "hide": 0,
         "label": "Search",
@@ -517,7 +517,7 @@
           "text": "",
           "value": ""
         },
-        "description": null,
+        "description": "Text search",
         "error": null,
         "hide": 0,
         "label": "Recorded by",
@@ -537,7 +537,6 @@
         "allValue": "null",
         "current": {
           "selected": true,
-          "tags": [],
           "text": [
             "All"
           ],
