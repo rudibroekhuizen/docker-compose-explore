@@ -14,7 +14,12 @@ UPDATE explore.gbif set recordedby_id = recordedby.id FROM explore.recordedby WH
 ALTER TABLE explore.gbif ADD CONSTRAINT "recorded_id_fkey" FOREIGN KEY (recordedby_id) REFERENCES explore.recordedby(id);
 
 CREATE INDEX ON explore.recordedby (name);
+
 CREATE INDEX ON explore.gbif (recordedby_id);
+
+CREATE EXTENSION pg_trgm;
+
+CREATE INDEX ON explore.recordedby USING gin(name gin_trgm_ops);
 
 -- SELECT * FROM explore.gbif JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id WHERE recordedby.id IN (2850,2851);
 -- SELECT * FROM explore.gbif JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id WHERE recordedby.name IN ('Levaillant F.','Bernstein H.A.');
