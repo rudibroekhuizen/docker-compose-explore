@@ -21,7 +21,7 @@ CREATE EXTENSION pg_trgm;
 
 CREATE INDEX ON explore.recordedby USING gin(name gin_trgm_ops);
 
--- SELECT * FROM explore.gbif JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id WHERE recordedby.id IN (2850,2851);
--- SELECT * FROM explore.gbif JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id WHERE recordedby.name IN ('Levaillant F.','Bernstein H.A.');
+-- SELECT * FROM explore.gbif a LEFT JOIN explore.recordedby b ON a.recordedby_id = b.id WHERE b.id IN (2850,2851);
+-- SELECT * FROM explore.gbif a LEFT JOIN explore.recordedby b ON a.recordedby_id = b.id WHERE b.name IN ('Levaillant F.','Bernstein H.A.');
 
 COMMIT;
