@@ -35,6 +35,7 @@ services:
 
   postgres:
     build: ./postgres
+    shm_size: 256M # more than shared_buffers value
     ports:
       - "5432:5432"
     volumes:
