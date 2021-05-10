@@ -17,7 +17,7 @@ CREATE INDEX ON explore.recordedby (name);
 
 CREATE INDEX ON explore.gbif (recordedby_id);
 
-CREATE EXTENSION pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE INDEX ON explore.recordedby USING gin(name gin_trgm_ops);
 
