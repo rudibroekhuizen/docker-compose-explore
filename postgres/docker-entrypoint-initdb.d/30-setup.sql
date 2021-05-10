@@ -546,7 +546,7 @@ UPDATE explore.gbif_raw SET "species" = null WHERE "species" = '';
 UPDATE explore.gbif_raw SET "genericname" = null WHERE "genericname" = '';
 
 -- Postgis magic for Grafana Track Map panel
-CREATE EXTENSION postgis;
+CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- Create table gbif
 CREATE TABLE explore.gbif (
