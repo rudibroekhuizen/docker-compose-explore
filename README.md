@@ -33,5 +33,4 @@ Browse to http://localhost:5601 in your browser to use the Kibana dashboard.
 ./20-setup.sql
 su postgres
 psql -d db1 -f 30-setup.sql
-psql -d db1 -f 40-normalize.sql
 ```
