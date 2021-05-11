@@ -1,7 +1,7 @@
 START TRANSACTION;
 
 -- Create schema
-CREATE SCHEMA explore;
+CREATE SCHEMA IF NOT EXISTS explore;
 
 -- Create table
 CREATE TABLE explore.gbif_raw (
