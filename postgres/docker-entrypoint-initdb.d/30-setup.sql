@@ -4,7 +4,7 @@ START TRANSACTION;
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 
 -- Create schema
-CREATE SCHEMA explore;
+CREATE SCHEMA IF NOT EXISTS explore;
 
 -- Create table
 CREATE TABLE explore.gbif_raw (
