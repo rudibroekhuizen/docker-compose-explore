@@ -30,7 +30,7 @@ Browse to http://localhost:5601 in your browser to use the Kibana dashboard.
 
 ## Load manually
 ```
-./20-setup.sql
+./20-setup.sh
 su postgres
 psql -d db1 -f 30-setup.sql
 ```
