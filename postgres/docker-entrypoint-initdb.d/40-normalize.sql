@@ -11,7 +11,7 @@ ALTER TABLE explore.gbif ADD COLUMN recordedby_id bigint;
 
 UPDATE explore.gbif set recordedby_id = recordedby.id FROM explore.recordedby WHERE gbif.recordedby = recordedby.name;
 
-ALTER TABLE explore.gbif ADD CONSTRAINT "recorded_id_fkey" FOREIGN KEY (recordedby_id) REFERENCES explore.recordedby(id);
+ALTER TABLE explore.gbif ADD CONSTRAINT "recordedby_id_fkey" FOREIGN KEY (recordedby_id) REFERENCES explore.recordedby(id);
 
 CREATE INDEX ON explore.recordedby (name);
 
