@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1619378599641,
+  "iteration": 1621680843902,
   "links": [],
   "panels": [
     {
@@ -81,7 +81,7 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH a AS (\nSELECT\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id \nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\n), b AS (\nSELECT\ngeom,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "WITH a AS (\nSELECT\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.scientificname ON gbif.scientificname_id = scientificname.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (scientificname.name % '$scientificname' OR NULLIF('$scientificname', '') IS null)\n), b AS (\nSELECT\ngeom,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "select": [
             [
@@ -158,7 +158,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*), $__time(eventdate)\n  --$__timeGroup(\"date\",'60m')\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id \nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nGROUP BY 2\nORDER BY 2 ASC",
+          "rawSql": "SELECT COUNT(*), $__time(eventdate)\n  --$__timeGroup(\"date\",'60m')\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.scientificname ON gbif.scientificname_id = scientificname.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (scientificname.name % '$scientificname' OR NULLIF('$scientificname', '') IS null)\nGROUP BY 2\nORDER BY 2 ASC",
           "refId": "A",
           "select": [
             [
@@ -263,7 +263,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*), recordedby\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id \nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
+          "rawSql": "SELECT COUNT(*), recordedby\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id \nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
           "refId": "A",
           "select": [
             [
@@ -332,7 +332,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*), preparations\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
+          "rawSql": "SELECT COUNT(*), scientificname\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.scientificname ON gbif.scientificname_id = scientificname.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (scientificname.name % '$scientificname' OR NULLIF('$scientificname', '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
           "refId": "A",
           "select": [
             [
@@ -356,7 +356,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Preparation method",
+      "title": "Scientific name",
       "type": "table"
     },
     {
@@ -415,7 +415,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT gbifid, eventdate, catalognumber, occurrenceid, recordedby, sex, preparations, locality, genus, specificepithet\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id \nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nORDER BY eventdate DESC\nLIMIT 100",
+          "rawSql": "SELECT eventdate, gbifid, catalognumber, scientificname, recordedby, occurrenceid, locality\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.scientificname ON gbif.scientificname_id = scientificname.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (scientificname.name % '$scientificname' OR NULLIF('$scientificname', '') IS null)\nORDER BY 1 DESC\nLIMIT 100",
           "refId": "A",
           "select": [
             [
@@ -520,8 +520,8 @@
         "description": "Text search",
         "error": null,
         "hide": 0,
-        "label": "Recorded by",
-        "name": "recordedby",
+        "label": "Scientific name",
+        "name": "scientificname",
         "options": [
           {
             "selected": true,
@@ -534,42 +534,32 @@
         "type": "textbox"
       },
       {
-        "allValue": "null",
         "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "selected": false,
+          "text": "",
+          "value": ""
         },
-        "datasource": "PostgreSQL",
-        "definition": "SELECT DISTINCT preparations FROM explore.gbif ORDER BY 1",
-        "description": null,
+        "description": "Text search",
         "error": null,
         "hide": 0,
-        "includeAll": true,
-        "label": "Preparations method",
-        "multi": true,
-        "name": "preparations",
-        "options": [],
-        "query": "SELECT DISTINCT preparations FROM explore.gbif ORDER BY 1",
-        "refresh": 1,
-        "regex": "",
+        "label": "Recorded by",
+        "name": "recordedby",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "textbox"
       }
     ]
   },
   "time": {
-    "from": "1779-12-31T23:40:28.000Z",
-    "to": "2020-12-31T23:00:00.000Z"
+    "from": "now-50y",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "",
