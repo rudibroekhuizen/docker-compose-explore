@@ -7,7 +7,7 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 CREATE SCHEMA IF NOT EXISTS explore;
 
 -- Create table
-CREATE TABLE explore.gbif_raw (
+CREATE UNLOGGED TABLE explore.gbif_raw (
 	gbifid DECIMAL, 
 	abstract BOOLEAN, 
 	accessrights BOOLEAN, 
@@ -511,9 +511,6 @@ ALTER TABLE explore.gbif_raw ALTER COLUMN "level2name" TYPE text;
 ALTER TABLE explore.gbif_raw ALTER COLUMN "level3gid" TYPE text;
 ALTER TABLE explore.gbif_raw ALTER COLUMN "level3name" TYPE text;
 ALTER TABLE explore.gbif_raw ALTER COLUMN "iucnredlistcategory" TYPE text;
-
--- Set to unlogged
-ALTER TABLE explore.gbif_raw SET UNLOGGED;
 
 -- Load data into table
 COPY explore.gbif_raw FROM '/tmp/gbif_raw.tsv' DELIMITER E'\t';
