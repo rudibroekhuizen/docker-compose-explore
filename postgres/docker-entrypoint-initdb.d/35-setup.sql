@@ -46,7 +46,7 @@ CREATE TABLE explore.multimedia (
  description text
 );
 
-CREATE INDEX ON explore.multimedia_raw USING BTREE (gbifid);
+CREATE INDEX ON explore.multimedia USING BTREE (gbifid,type);
 
 INSERT INTO explore.multimedia (SELECT
  gbifid::bigint, 
