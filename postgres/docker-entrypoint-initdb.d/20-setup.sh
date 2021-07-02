@@ -27,3 +27,6 @@ sed -i -e 4459671d /tmp/gbif_raw.tsv
 sed -i -e 4476781d /tmp/gbif_raw.tsv
 sed -i -e 4517094d /tmp/gbif_raw.tsv
 sed -i -e 4778815d /tmp/gbif_raw.tsv
+
+# Remove headerline from multimedia.txt
+tail -n +2 /tmp/multimedia.txt > /tmp/multimedia_raw.tsv
