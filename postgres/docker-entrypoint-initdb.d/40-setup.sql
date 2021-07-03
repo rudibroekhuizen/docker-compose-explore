@@ -37,17 +37,17 @@ topn_cluster_id jsonb
 
 INSERT INTO explore.gbif_aggregated(time, concave,hll_gbifid,hll_scientificname,hll_recordedby,hll_locality,hll_cluster_id,topn_scientificname,topn_recordedby,topn_locality,topn_cluster_id)
 SELECT
-	time,
-	concave,
-	hll_add_agg(hll_hash_bigint(gbifid)),
-	hll_add_agg(hll_hash_text(scientificname)),
-	hll_add_agg(hll_hash_text(recordedby)),
-	hll_add_agg(hll_hash_text(locality)),
-	hll_add_agg(hll_hash_integer(cluster_id)),
-	topn_add_agg(scientificname),
-	topn_add_agg(recordedby),
-	topn_add_agg(locality),
-	topn_add_agg(cluster_id::text)
+time,
+concave,
+hll_add_agg(hll_hash_bigint(gbifid)),
+hll_add_agg(hll_hash_text(scientificname)),
+hll_add_agg(hll_hash_text(recordedby)),
+hll_add_agg(hll_hash_text(locality)),
+hll_add_agg(hll_hash_integer(cluster_id)),
+topn_add_agg(scientificname),
+topn_add_agg(recordedby),
+topn_add_agg(locality),
+topn_add_agg(cluster_id::text)
 FROM explore.gbif_enriched
 GROUP BY 1,2
 ORDER BY 1,2
