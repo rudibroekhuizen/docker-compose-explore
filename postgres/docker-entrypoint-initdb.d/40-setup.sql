@@ -19,4 +19,37 @@ ST_SetSRID(ST_Centroid(stunion), 4326) AS centro_id,
 ST_Concavehull(ST_RemoveRepeatedPoints(stunion,1),1) AS concave
 FROM c
 
+-- Create aggregation table
+CREATE TABLE explore.gbif_aggregated(
+id INT GENERATED ALWAYS AS IDENTITY,
+time date,
+concave geometry,
+hll_gbifid hll,
+hll_scientificname hll,
+hll_recordedby hll,
+hll_locality hll,
+hll_cluster_id hll,
+topn_scientificname jsonb,
+topn_recordedby jsonb,
+topn_locality jsonb,
+topn_cluster_id jsonb
+);
+
+INSERT INTO explore.gbif_aggregated(time, concave,hll_gbifid,hll_scientificname,hll_recordedby,hll_locality,hll_cluster_id,topn_scientificname,topn_recordedby,topn_locality,topn_cluster_id)
+SELECT
+	time,
+	concave,
+	hll_add_agg(hll_hash_bigint(gbifid)),
+	hll_add_agg(hll_hash_text(scientificname)),
+	hll_add_agg(hll_hash_text(recordedby)),
+	hll_add_agg(hll_hash_text(locality)),
+	hll_add_agg(hll_hash_integer(cluster_id)),
+	topn_add_agg(scientificname),
+	topn_add_agg(recordedby),
+	topn_add_agg(locality),
+	topn_add_agg(cluster_id::text)
+FROM explore.gbif_enriched
+GROUP BY 1,2
+ORDER BY 1,2
+
 COMMIT;
