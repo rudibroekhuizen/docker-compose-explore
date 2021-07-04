@@ -1,7 +1,7 @@
 START TRANSACTION;
 
 -- Create enriched table
-CREATE MATERIALIZED VIEW explore.gbif_enriched AS 
+CREATE TABLE explore.gbif_enriched AS 
 WITH a AS (
 SELECT * FROM explore.gbif 
 ), b AS (	
