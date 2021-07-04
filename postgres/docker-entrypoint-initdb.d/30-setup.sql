@@ -582,6 +582,7 @@ tsv tsvector
 -- Create indexes
 CREATE INDEX ON explore.gbif USING GIST (geom);
 CREATE INDEX ON explore.gbif USING BTREE (eventdate);
+CREATE INDEX ON explore.gbif USING GIST (tsv);  
 
 -- Create trigger to generate tsvectors on insert
 CREATE TRIGGER create_tsv BEFORE INSERT OR UPDATE
