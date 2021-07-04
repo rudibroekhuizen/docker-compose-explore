@@ -69,4 +69,14 @@ SELECT id, jsonb_to_tsvector('simple', c, '["all"]') AS d FROM b
 ) foo
 WHERE foo.id = gbif_aggregated.id;
 
+-- Create indexes on table explore.gbif_enriched
+CREATE INDEX ON explore.gbif_enriched USING GIST (geom);
+CREATE INDEX ON explore.gbif_enriched USING BTREE (time);
+CREATE INDEX ON explore.gbif_enriched USING GIST (tsv);  
+
+-- Create indexes on table explore.gbif_aggregated
+CREATE INDEX ON explore.gbif_aggregated USING GIST (concave);
+CREATE INDEX ON explore.gbif_aggregated USING BRIN (time);
+CREATE INDEX ON explore.gbif_aggregated USING GIST (tsv_topn_scientificname);  
+
 COMMIT;
