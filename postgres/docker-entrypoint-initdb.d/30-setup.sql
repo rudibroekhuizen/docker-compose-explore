@@ -582,10 +582,6 @@ CREATE TABLE explore.gbif (
  tsv_recordedby tsvector
 );
 
--- Create indexes
-CREATE INDEX ON explore.gbif USING GIST (geom);
-CREATE INDEX ON explore.gbif USING BTREE (eventdate);
-
 -- Create trigger to generate tsvectors on insert scientificname
 CREATE TRIGGER create_tsv_scientificname BEFORE INSERT OR UPDATE
 ON explore.gbif FOR EACH ROW EXECUTE FUNCTION
