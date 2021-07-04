@@ -35,6 +35,7 @@ topn_locality jsonb,
 topn_cluster_id jsonb
 );
 
+-- Insert data into aggregation table
 INSERT INTO explore.gbif_aggregated(time, concave,hll_gbifid,hll_scientificname,hll_recordedby,hll_locality,hll_cluster_id,topn_scientificname,topn_recordedby,topn_locality,topn_cluster_id)
 SELECT
 time,
@@ -51,5 +52,21 @@ topn_add_agg(cluster_id::text)
 FROM explore.gbif_enriched
 GROUP BY 1,2
 ORDER BY 1,2
+
+-- FTS on topn scienticname values
+ALTER TABLE explore.gbif_aggregated ADD COLUMN tsv_topn_scientificname tsvector;
+
+-- FTS on topn scienticname values
+UPDATE explore.gbif_aggregated
+SET tsv_topn_scientificname = d
+FROM (
+WITH a AS (
+SELECT id, jsonb_object_keys(topn_scientificname) AS keys
+FROM explore.gbif_aggregated), b AS (
+SELECT id, to_jsonb(ARRAY_AGG(keys)) AS c FROM a GROUP BY 1
+)
+SELECT id, jsonb_to_tsvector('simple', c, '["all"]') AS d FROM b
+) foo
+WHERE foo.id = gbif_aggregated.id;
 
 COMMIT;
