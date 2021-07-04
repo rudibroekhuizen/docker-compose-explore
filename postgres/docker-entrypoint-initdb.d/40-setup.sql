@@ -17,7 +17,7 @@ FROM b
 SELECT *, 
 ST_SetSRID(ST_Centroid(stunion), 4326) AS centro_id,
 ST_Concavehull(ST_RemoveRepeatedPoints(stunion,1),1) AS concave
-FROM c
+FROM c;
 
 -- Create aggregation table
 CREATE TABLE explore.gbif_aggregated(
@@ -51,7 +51,7 @@ topn_add_agg(locality),
 topn_add_agg(cluster_id::text)
 FROM explore.gbif_enriched
 GROUP BY 1,2
-ORDER BY 1,2
+ORDER BY 1,2;
 
 -- FTS on topn scienticname values
 ALTER TABLE explore.gbif_aggregated ADD COLUMN tsv_topn_scientificname tsvector;
