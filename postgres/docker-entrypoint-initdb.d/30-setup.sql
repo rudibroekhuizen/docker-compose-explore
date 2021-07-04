@@ -578,37 +578,26 @@ CREATE TABLE explore.gbif (
  decimallongitude float,
  geom geometry(POINT,4326),
  location text,
- tsv tsvector
+ tsv_scientificname tsvector,
+ tsv_recordedby tsvector
 );
 
 -- Create indexes
 CREATE INDEX ON explore.gbif USING GIST (geom);
 CREATE INDEX ON explore.gbif USING BTREE (eventdate);
 
--- Create trigger to generate tsvectors on insert
-CREATE TRIGGER create_tsv BEFORE INSERT OR UPDATE
+-- Create trigger to generate tsvectors on insert scientificname
+CREATE TRIGGER create_tsv_scientificname BEFORE INSERT OR UPDATE
 ON explore.gbif FOR EACH ROW EXECUTE FUNCTION
-tsvector_update_trigger(tsv, 'pg_catalog.simple', 
-catalognumber, 
-occurrenceid, 
-recordedby, 
-sex, 
-lifestage, 
-preparations, 
-locality, 
-stateprovince, 
-countrycode, 
-higherclassification, 
-kingdom, 
-phylum, 
-class, 
-"order", 
-family, 
-genus, 
-specificepithet,
-species,
-genericname,
+tsvector_update_trigger(tsv_scientificname, 'pg_catalog.simple', 
 scientificname
+);
+
+-- Create trigger to generate tsvectors on insert recordedby
+CREATE TRIGGER create_tsv_recordedby BEFORE INSERT OR UPDATE
+ON explore.gbif FOR EACH ROW EXECUTE FUNCTION
+tsvector_update_trigger(tsv_recordedby, 'pg_catalog.simple', 
+recordedby
 );
 
 -- Create function and trigger to populate geom column
