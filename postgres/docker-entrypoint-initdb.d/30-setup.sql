@@ -588,6 +588,7 @@ CREATE INDEX ON explore.gbif USING GIST (tsv);
 CREATE TRIGGER create_tsv BEFORE INSERT OR UPDATE
 ON explore.gbif FOR EACH ROW EXECUTE FUNCTION
 tsvector_update_trigger(tsv, 'pg_catalog.simple', 
+gbifid,
 catalognumber, 
 occurrenceid, 
 recordedby, 
