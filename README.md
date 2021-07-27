@@ -31,6 +31,7 @@ Browse to http://localhost:5601 in your browser to use the Kibana dashboard.
 ## Load manually
 ```
 git clone https://github.com/rudibroekhuizen/docker-compose-explore /tmp
+cd docker-compose-explore/postgres/docker-entrypoint-initdb.d
 chmod +x 20-setup.sh
 ./20-setup.sh
 su postgres
