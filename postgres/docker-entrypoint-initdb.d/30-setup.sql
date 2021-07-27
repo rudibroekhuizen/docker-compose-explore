@@ -692,6 +692,6 @@ FROM explore.gbif_raw
 
 -- Set a value for empty geom and empty eventdate
 UPDATE explore.gbif SET geom = ST_SetSRID(ST_Makepoint(1,1),4326) WHERE geom IS NULL;
-UPDATE explore.gbif SET eventdate = '1700-01-01' WHERE eventdate IS NULL;
+UPDATE explore.gbif SET eventdate = '1690-01-01' WHERE eventdate IS NULL;
 
 COMMIT;
