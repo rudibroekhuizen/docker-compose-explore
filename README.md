@@ -30,11 +30,12 @@ Browse to http://localhost:5601 in your browser to use the Kibana dashboard.
 
 ## Load manually
 ```
-git clone https://github.com/rudibroekhuizen/docker-compose-explore /tmp/docker-compose-explore
-chmod +x 20-setup.sh
-./20-setup.sh
-su postgres
-psql -d db1 -f 30-setup.sql
-psql -d db1 -f 40-setup.sql
-psql -d db1 -f 50-normalize.sql
+- git clone https://github.com/rudibroekhuizen/docker-compose-explore /tmp/docker-compose-explore
+- cd /tmp/docker-compose-explore/postgres/docker-entrypoint-initdb.d
+- chmod +x 20-setup.sh
+- ./20-setup.sh
+- su postgres
+- psql -d db1 -f 30-setup.sql
+- psql -d db1 -f 40-setup.sql
+- psql -d db1 -f 50-normalize.sql
 ```
