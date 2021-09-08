@@ -57,20 +57,20 @@ GROUP BY 1,2
 ORDER BY 1,2;
 
 -- FTS on topn scienticname values
-ALTER TABLE explore.gbif_aggregated ADD COLUMN tsv_topn_scientificname tsvector;
+-- ALTER TABLE explore.gbif_aggregated ADD COLUMN tsv_topn_scientificname tsvector;
 
 -- FTS on topn scienticname values
-UPDATE explore.gbif_aggregated
-SET tsv_topn_scientificname = d
-FROM (
-WITH a AS (
-SELECT id, jsonb_object_keys(topn_scientificname) AS keys
-FROM explore.gbif_aggregated), b AS (
-SELECT id, to_jsonb(ARRAY_AGG(keys)) AS c FROM a GROUP BY 1
-)
-SELECT id, jsonb_to_tsvector('simple', c, '["all"]') AS d FROM b
-) foo
-WHERE foo.id = gbif_aggregated.id;
+-- UPDATE explore.gbif_aggregated
+-- SET tsv_topn_scientificname = d
+-- FROM (
+-- WITH a AS (
+-- SELECT id, jsonb_object_keys(topn_scientificname) AS keys
+-- FROM explore.gbif_aggregated), b AS (
+-- SELECT id, to_jsonb(ARRAY_AGG(keys)) AS c FROM a GROUP BY 1
+-- )
+-- SELECT id, jsonb_to_tsvector('simple', c, '["all"]') AS d FROM b
+-- ) foo
+-- WHERE foo.id = gbif_aggregated.id;
 
 -- Create indexes on table explore.gbif_enriched
 CREATE INDEX ON explore.gbif_enriched USING GIST (geom);
@@ -80,6 +80,6 @@ CREATE INDEX ON explore.gbif_enriched USING GIST (tsv);
 -- Create indexes on table explore.gbif_aggregated
 CREATE INDEX ON explore.gbif_aggregated USING GIST (concave);
 CREATE INDEX ON explore.gbif_aggregated USING BRIN (time);
-CREATE INDEX ON explore.gbif_aggregated USING GIST (tsv_topn_scientificname);  
+-- CREATE INDEX ON explore.gbif_aggregated USING GIST (tsv_topn_scientificname);  
 
 COMMIT;
