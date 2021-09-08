@@ -75,7 +75,7 @@ ORDER BY 1,2;
 -- Create indexes on table explore.gbif_enriched
 CREATE INDEX ON explore.gbif_enriched USING GIST (geom);
 CREATE INDEX ON explore.gbif_enriched USING BTREE (time);
-CREATE INDEX ON explore.gbif_enriched USING GIST (tsv);  
+-- CREATE INDEX ON explore.gbif_enriched USING GIST (tsv);  
 
 -- Create indexes on table explore.gbif_aggregated
 CREATE INDEX ON explore.gbif_aggregated USING GIST (concave);
