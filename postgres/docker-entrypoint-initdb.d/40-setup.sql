@@ -1,5 +1,8 @@
 START TRANSACTION;
 
+CREATE EXTENSION IF NOT EXISTS hll;
+CREATE EXTENSION IF NOT EXISTS topn;
+
 -- Create enriched table
 CREATE TABLE explore.gbif_enriched AS 
 WITH a AS (
