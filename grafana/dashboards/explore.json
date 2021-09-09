@@ -12,26 +12,1247 @@
       }
     ]
   },
+  "description": "",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1621680843902,
+  "id": 3,
+  "iteration": 1631198767869,
   "links": [],
   "panels": [
     {
-      "datasource": null,
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PostgreSQL",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 45,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.5.4",
+      "pointradius": 0.5,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT time, hll_cardinality(hll_union_agg(hll_gbifid)) AS total_records_cube1\nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) AS bla\n  from explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla >= 50000 )\nGROUP BY 1\n\nUNION ALL\n\nSELECT time, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND EXISTS\n( WITH a AS (\n  SELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)),0) AS bla\n  FROM explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla < 50000 )\nGROUP BY 1\n\nUNION ALL\n\n(SELECT time, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\n--AND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n\nUNION ALL\n\n(SELECT time, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\n--AND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n\nUNION ALL\n\n(SELECT time, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n",
+          "refId": "F",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT time, hll_cardinality(hll_union_agg(hll_gbifid)) AS total_records_cube1\nFROM explore.cube1\nWHERE $__timeFilter(time)\nAND grouping_time = 0\nAND grouping_concave = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nGROUP BY 1\nORDER BY 1",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT time, hll_cardinality(hll_union_agg(hll_gbifid)) AS total_records\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_time = 0\nAND grouping_centro_id = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nGROUP BY 1\nORDER BY 1",
+          "refId": "E",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT time, hll_cardinality(hll_union_agg(hll_scientificname)) AS distinct_scientificname\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_time = 0\nAND grouping_centro_id = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT time, hll_cardinality(hll_union_agg(hll_recordedby)) AS distinct_recordedby\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_time = 0\nAND grouping_centro_id = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nGROUP BY 1\nORDER BY 1",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT time, hll_cardinality(hll_union_agg(hll_cluster_id)) AS distinct_cluster_id\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_time = 0\nAND grouping_centro_id = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nGROUP BY 1\nORDER BY 1",
+          "refId": "D",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Graph",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": "PostgreSQL",
+      "description": "Based on time and location",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "id": 57,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n",
+          "refId": "D",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_gbifid))\nFROM explore.cube1\nWHERE $__timeFilter(time)\nAND grouping_concave = 0\nAND grouping_time = 0\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\nAND (tsv_scientificname2 @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS\n( WITH a AS (\n  SELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)),0) AS bla\n  FROM explore.cube1\n  WHERE $__timeFilter(time)\n  AND grouping_time = 0\n  AND grouping_concave = 0\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n  AND (tsv_scientificname2 @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\n) SELECT 1 FROM a WHERE bla >= 50000 )\nUNION ALL\nSELECT NULLIF(count(*), 0)\nFROM explore.grouped\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS\n( WITH a AS (\n  SELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)),0) AS bla\n  FROM explore.cube1\n  WHERE $__timeFilter(time)\n  AND grouping_time = 0\n  AND grouping_concave = 0\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n  AND (tsv_scientificname2 @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\n) SELECT 1 FROM a WHERE bla < 50000 )",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_gbifid))\nFROM explore.cube1\nWHERE $__timeFilter(time)\nAND grouping_concave = 0\nAND grouping_time = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) as bla\n  from explore.cube1\n  WHERE $__timeFilter(time)\n  AND grouping_time = 0\n  AND grouping_concave = 0\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla >= 15000 )\nUNION ALL\nSELECT count(*)\nFROM explore.grouped\nWHERE $__timeFilter(time)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) as bla\n  from explore.cube1\n  WHERE $__timeFilter(time)\n  AND grouping_time = 0\n  AND grouping_concave = 0\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla < 15000 )\n\n",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_gbifid)) \nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_time = 0\nAND grouping_centro_id = 0\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Selected records gbif_enriched",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "description": "Based on time and location",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "id": 44,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)), 0)\nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n\n",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_gbifid))\nFROM explore.cube1\nWHERE $__timeFilter(time)\nAND grouping_concave = 0\nAND grouping_time = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) as bla\n  from explore.cube1\n  WHERE $__timeFilter(time)\n  AND grouping_time = 0\n  AND grouping_concave = 0\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla >= 15000 )\nUNION ALL\nSELECT count(*)\nFROM explore.grouped\nWHERE $__timeFilter(time)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) as bla\n  from explore.cube1\n  WHERE $__timeFilter(time)\n  AND grouping_time = 0\n  AND grouping_concave = 0\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla < 15000 )\n\n",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_gbifid)) \nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_time = 0\nAND grouping_centro_id = 0\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Selected records gbif_aggregated",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "id": 54,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_gbifid)) \nFROM explore.gbif_aggregated",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "All records",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 12,
+        "y": 4
+      },
+      "id": 49,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_scientificname)) \nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n--AND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Distinct scientificname",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 16,
+        "y": 4
+      },
+      "id": 50,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_recordedby)) \nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n--AND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Distinct recordedby ",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 20,
+        "y": 4
+      },
+      "id": 47,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_locality)) \nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n--AND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Distinct locality",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 48,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT hll_cardinality(hll_union_agg(hll_cluster_id)) \nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n--AND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Distinct clusters",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 4,
+        "x": 12,
+        "y": 6
+      },
+      "id": 46,
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SET search_path TO explore,public;\n\nSELECT (topn(topn_union_agg(topn_scientificname), 15)).*\nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) AS bla\n  from explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla >= 50000 )\n\nUNION ALL\n\n(SELECT scientificname, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND EXISTS\n( WITH a AS (\n  SELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)),0) AS bla\n  FROM explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla < 50000 )\nGROUP BY 1\nORDER BY 2 DESC)\n\nUNION ALL\n\n(SELECT scientificname, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\n--AND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n\nUNION ALL\n\n(SELECT scientificname, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\n--AND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n\nUNION ALL\n\n(SELECT scientificname, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT  (topn(topn_union_agg(topn_scientificname), 15)).*\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_centro_id = 0\nAND grouping_time = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Top scientificname",
+      "type": "table"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 4,
+        "x": 16,
+        "y": 6
+      },
+      "id": 51,
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SET search_path TO explore,public;\n\nSELECT (topn(topn_union_agg(topn_recordedby), 15)).*\nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) AS bla\n  from explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla >= 50000 )\n\nUNION ALL\n\n(SELECT recordedby, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND EXISTS\n( WITH a AS (\n  SELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)),0) AS bla\n  FROM explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla < 50000 )\nGROUP BY 1\nORDER BY 2 DESC\nLIMIT 15)\n\nUNION ALL\n\n(SELECT recordedby, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\n--AND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n\nUNION ALL\n\n(SELECT recordedby, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\n--AND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n\nUNION ALL\n\n(SELECT recordedby, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname')\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby')\nGROUP BY 1\nORDER BY 2 DESC)\n",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT  (topn(topn_union_agg(topn_recordedby), 15)).*\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_centro_id = 0\nAND grouping_time = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Top recordedby",
+      "type": "table"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 4,
+        "x": 20,
+        "y": 6
+      },
+      "id": 52,
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SET search_path TO explore,public;\n\nSELECT  (topn(topn_union_agg(topn_locality), 15)).*\nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) AS bla\n  from explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla >= 50000 )\nUNION ALL\nSELECT locality, count(*)\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS\n( WITH a AS (\n  SELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)),0) AS bla\n  FROM explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla < 50000 )\nGROUP BY 1\nORDER BY 2 DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT  (topn(topn_union_agg(topn_locality), 15)).*\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_centro_id = 0\nAND grouping_time = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\n",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Top locality",
+      "type": "table"
+    },
+    {
+      "datasource": "PostgreSQL",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
       },
       "gridPos": {
-        "h": 13,
+        "h": 9,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 8
       },
-      "id": 2,
+      "id": 42,
       "options": {
         "ant": {
           "color": "rgb(0, 100, 255)",
@@ -40,6 +1261,10 @@
           "pulseColor": "rgb(0, 0, 0)",
           "reverse": false,
           "weight": 5
+        },
+        "coordinates": {
+          "customLatitudeColumnName": "",
+          "customLongitudeColumnName": ""
         },
         "discardZeroOrNull": true,
         "heat": {
@@ -81,8 +1306,116 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH a AS (\nSELECT\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.scientificname ON gbif.scientificname_id = scientificname.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (scientificname.name % '$scientificname' OR NULLIF('$scientificname', '') IS null)\n), b AS (\nSELECT\ngeom,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "(WITH a AS (\nSELECT \ngeom, gbifid,\nCOUNT(gbifid) OVER() AS cnt\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND EXISTS\n( WITH a AS (\n  SELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)),0) AS bla\n  from explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla <= 50000 ) \nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\n), b AS (\nSELECT\ngeom, gbifid,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\n--ST_Y (ST_Transform (ST_Centroid(geom), 4326)) AS latitude,\n--ST_X (ST_Transform (ST_Centroid(geom), 4326)) AS longitude,\nCOUNT(DISTINCT gbifid) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1)\n\nUNION ALL\n\n(WITH a AS (\nSELECT \nconcave, \nROUND(hll_cardinality(hll_union_agg(hll_gbifid))::int,0) AS tooltip\nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) as bla\n  from explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla > 50000 )\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nGROUP BY 1\n)\nSELECT\n1 AS clusters,\ntooltip,\nST_Y (ST_Transform (ST_Centroid(concave), 4326)) AS latitude,\nST_X (ST_Transform (ST_Centroid(concave), 4326)) AS longitude\nFROM a\n)\n\nUNION ALL\n\n(WITH a AS (\nSELECT \ngeom, gbifid,\nCOUNT(gbifid) OVER() AS cnt\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') --OR NULLIF('$scientificname', '') IS null)\n--AND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n), b AS (\nSELECT\ngeom, gbifid,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\n--ST_Y (ST_Transform (ST_Centroid(geom), 4326)) AS latitude,\n--ST_X (ST_Transform (ST_Centroid(geom), 4326)) AS longitude,\nCOUNT(DISTINCT gbifid) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1)\n\nUNION ALL\n\n(WITH a AS (\nSELECT \ngeom, gbifid,\nCOUNT(gbifid) OVER() AS cnt\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') --OR NULLIF('$recordedby', '') IS null)\n--GROUP BY 1\n), b AS (\nSELECT\ngeom, gbifid,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\n--ST_Y (ST_Transform (ST_Centroid(geom), 4326)) AS latitude,\n--ST_X (ST_Transform (ST_Centroid(geom), 4326)) AS longitude,\nCOUNT(DISTINCT gbifid) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1)\n\nUNION ALL\n\n(WITH a AS (\nSELECT \ngeom, gbifid,\nCOUNT(gbifid) OVER() AS cnt\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') --OR NULLIF('$scientificname', '') IS null)\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') --OR NULLIF('$recordedby', '') IS null)\n--GROUP BY 1\n), b AS (\nSELECT\ngeom, gbifid,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\n--ST_Y (ST_Transform (ST_Centroid(geom), 4326)) AS latitude,\n--ST_X (ST_Transform (ST_Centroid(geom), 4326)) AS longitude,\nCOUNT(DISTINCT gbifid) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1)\n\n\n",
+          "refId": "D",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "(WITH a AS (\nSELECT \ngeom, gbifid,\nCOUNT(gbifid) OVER() AS cnt\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND EXISTS\n( WITH a AS (\n  SELECT GREATEST(hll_cardinality(hll_union_agg(hll_gbifid)),0) AS bla\n  from explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla <= 50000 ) \nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\n--group by 1,2\n), b AS (\nSELECT\ngeom, gbifid,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\n--ST_Y (ST_Transform (ST_Centroid(geom), 4326)) AS latitude,\n--ST_X (ST_Transform (ST_Centroid(geom), 4326)) AS longitude,\nCOUNT(DISTINCT gbifid) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1)\n\nUNION ALL\n\n(WITH a AS (\nSELECT \nconcave, \nROUND(hll_cardinality(hll_union_agg(hll_gbifid))::int,0) AS tooltip\nFROM explore.gbif_aggregated\nWHERE $__timeFilter(time)\nAND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) as bla\n  from explore.gbif_aggregated\n  WHERE $__timeFilter(time)\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla > 50000 )\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nGROUP BY 1\n)\nSELECT\n1 AS clusters,\ntooltip,\nST_Y (ST_Transform (ST_Centroid(concave), 4326)) AS latitude,\nST_X (ST_Transform (ST_Centroid(concave), 4326)) AS longitude\nFROM a\n)\n\nUNION ALL\n\n(WITH a AS (\nSELECT \ngeom, \nCOUNT(*) OVER() AS cnt\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') --OR NULLIF('$scientificname', '') IS null)\n--AND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\nGROUP BY 1\n), b AS (\nSELECT\ngeom,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\n--ST_Y (ST_Transform (ST_Centroid(geom), 4326)) AS latitude,\n--ST_X (ST_Transform (ST_Centroid(geom), 4326)) AS longitude,\nCOUNT(clusters) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1)\n\nUNION ALL\n\n(WITH a AS (\nSELECT \ngeom, \nCOUNT(*) OVER() AS cnt\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') --OR NULLIF('$recordedby', '') IS null)\nGROUP BY 1\n), b AS (\nSELECT\ngeom,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\n--ST_Y (ST_Transform (ST_Centroid(geom), 4326)) AS latitude,\n--ST_X (ST_Transform (ST_Centroid(geom), 4326)) AS longitude,\nCOUNT(clusters) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1)\n\nUNION ALL\n\n(WITH a AS (\nSELECT \ngeom, \nCOUNT(*) OVER() AS cnt\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\nAND tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') --OR NULLIF('$scientificname', '') IS null)\nAND tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') --OR NULLIF('$recordedby', '') IS null)\nGROUP BY 1\n), b AS (\nSELECT\ngeom,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\n--ST_Y (ST_Transform (ST_Centroid(geom), 4326)) AS latitude,\n--ST_X (ST_Transform (ST_Centroid(geom), 4326)) AS longitude,\nCOUNT(clusters) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1)\n\n\n",
+          "refId": "E",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH a AS (\nSELECT \ngeom, \nCOUNT(*) AS cnt, count(*) over () AS number_of_clusters\nFROM explore.grouped\nWHERE $__timeFilter(time)\n--AND grouping_centro_id = 0\n--AND grouping_time = 0\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) as bla\n  from explore.cube1\n  WHERE $__timeFilter(time)\n  AND grouping_time = 0\n  AND grouping_concave = 0\n  AND ST_intersects(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), concave)\n) SELECT 1 FROM a WHERE bla <= 15000 ) \n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\ngroup by 1\n), b AS (\nSELECT\ngeom, cnt,\nST_ClusterKMeans(geom, LEAST(number_of_clusters::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\ncnt AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1,2\nORDER BY 1;",
           "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nwith a as (\nSELECT \ngeom\n--hll_cardinality(hll_union_agg(hll_gbifid)) AS tooltip\nFROM explore.grouped\nWHERE $__timeFilter(time)\n--AND grouping_centro_id = 0\n--AND grouping_time = 0\nAND EXISTS\n( WITH a AS (\n  select hll_cardinality(hll_union_agg(hll_gbifid)) as bla\n  from explore.cube\n  WHERE $__timeFilter(time)\n  AND grouping_time = 0\n  AND grouping_centro_id = 0\n  AND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n) SELECT 1 FROM a WHERE bla <= 1000 ) \n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\n--AND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\ngroup by 1\n)\nselect \nST_Y (ST_Transform (geom, 4326)) AS latitude,\nST_X (ST_Transform (geom, 4326)) AS longitude\n--tooltip\nfrom a",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nwith a as (\nSELECT \ncentro_id, \nhll_cardinality(hll_union_agg(hll_gbifid)) AS tooltip\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_centro_id = 0\nAND grouping_time = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\ngroup by 1\n)\nselect \nST_Y (ST_Transform (centro_id, 4326)) AS latitude,\nST_X (ST_Transform (centro_id, 4326)) AS longitude,\ntooltip\nfrom a",
+          "refId": "C",
           "select": [
             [
               {
@@ -109,11 +1442,687 @@
       "type": "alexandra-trackmap-panel"
     },
     {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": null
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scientificname"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 265
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 10,
+        "x": 0,
+        "y": 17
+      },
+      "id": 55,
+      "links": [],
+      "options": {
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, \n--count(*) over (), \nscientificname, recordedby, locality FROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n--AND (locality IN ('$locality') OR NULLIF('$locality', '') IS null)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nLIMIT 100",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, count(*) over (), recordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\n--AND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$locality')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nUNION ALL\n\nSELECT time, count(*) over (), recordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND (tsv @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\n--AND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$locality')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nUNION ALL\n\nSELECT time, count(*) over (), recordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND (tsv @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$locality')), '') IS NOT NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n\nUNION ALL\n\nSELECT time, count(*) over (), recordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$locality')), '') IS NOT NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n\nLIMIT 100",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND grouping_time = 0\n--AND grouping_centro_id = 0\n--AND grouping_cluster_id = 0\n--AND grouping_locality = 0--CASE WHEN NULLIF(TRIM(CONCAT($locality)), '') is null THEN 1 ELSE 0 END\n--AND grouping_scientificname = 0--CASE WHEN NULLIF(TRIM(CONCAT($scientificname)), '') is null THEN 1 ELSE 0 END\nAND scientificname % '$scientificname' --OR NULLIF(TRIM(CONCAT($scientificname)), '') IS null) \nAND locality % ($locality) OR NULLIF(TRIM(CONCAT('$locality')), '') IS null)\nLIMIT 100;",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Table explore.grouped using OR",
+      "type": "table"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": null
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scientificname"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 265
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 10,
+        "y": 17
+      },
+      "id": 38,
+      "links": [],
+      "options": {
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, recordedby, locality, scientificname\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\n--AND locality % ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND ST_contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nUNION ALL\n\nSELECT time, recordedby, locality, scientificname\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\n--AND scientificname IN ('$scientificname')\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\n--AND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nUNION ALL\n\nSELECT time, recordedby, locality, scientificname \nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\n--AND (tsv @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\n\nUNION ALL\n\nSELECT time, recordedby, locality, scientificname\nFROM explore.gbif_enriched\nWHERE $__timeFilter(time)\n--AND scientificname IN ('$scientificname')\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\n\nLIMIT 100",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, \ncount(*) over (), \nrecordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\nAND (scientificname % '$scientificname' OR NULLIF('$scientificname', '') IS null)\nAND (locality % '$locality' OR NULLIF('$locality', '') IS null)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nLIMIT 100",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND grouping_time = 0\n--AND grouping_centro_id = 0\n--AND grouping_cluster_id = 0\n--AND grouping_locality = 0--CASE WHEN NULLIF(TRIM(CONCAT($locality)), '') is null THEN 1 ELSE 0 END\n--AND grouping_scientificname = 0--CASE WHEN NULLIF(TRIM(CONCAT($scientificname)), '') is null THEN 1 ELSE 0 END\nAND scientificname % '$scientificname' --OR NULLIF(TRIM(CONCAT($scientificname)), '') IS null) \nAND locality % ($locality) OR NULLIF(TRIM(CONCAT('$locality')), '') IS null)\nLIMIT 100;",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Table explore.grouped using UNION ALL and EXISTS",
+      "type": "table"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": null
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scientificname"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": null
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 17,
+        "y": 17
+      },
+      "id": 56,
+      "links": [],
+      "options": {
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, \n--count(*) over (), \nrecordedby, scientificname, locality FROM explore.gbif_enriched\nWHERE $__timeFilter(time)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') AND NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL) = CASE WHEN NULLIF(TRIM(CONCAT('$scientificname')), '') is null THEN not true ELSE true END\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') AND NULLIF(TRIM(CONCAT('$recordedby')), '') IS NOT NULL) = CASE WHEN NULLIF(TRIM(CONCAT('$recordedby')), '') is null THEN not true ELSE true END\n--AND (locality IN ('$locality') AND NULLIF(TRIM(CONCAT('$locality')), '') IS NOT NULL) = CASE WHEN NULLIF(TRIM(CONCAT('$locality')), '') is null THEN not true ELSE true END\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nLIMIT 100",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, count(*) over (), recordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\n--AND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$locality')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nUNION ALL\n\nSELECT time, count(*) over (), recordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND (tsv @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\n--AND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$locality')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nUNION ALL\n\nSELECT time, count(*) over (), recordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND (tsv @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NOT NULL)\nAND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$locality')), '') IS NOT NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n\nUNION ALL\n\nSELECT time, count(*) over (), recordedby, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND scientificname % '$scientificname'\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND locality IN ('$locality')\nAND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$locality')), '') IS NOT NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\n\nLIMIT 100",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND grouping_time = 0\n--AND grouping_centro_id = 0\n--AND grouping_cluster_id = 0\n--AND grouping_locality = 0--CASE WHEN NULLIF(TRIM(CONCAT($locality)), '') is null THEN 1 ELSE 0 END\n--AND grouping_scientificname = 0--CASE WHEN NULLIF(TRIM(CONCAT($scientificname)), '') is null THEN 1 ELSE 0 END\nAND scientificname % '$scientificname' --OR NULLIF(TRIM(CONCAT($scientificname)), '') IS null) \nAND locality % ($locality) OR NULLIF(TRIM(CONCAT('$locality')), '') IS null)\nLIMIT 100;",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Table explore.grouped using TRUE FALSE",
+      "type": "table"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 36,
+      "links": [],
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "WITH a AS (\nSELECT gbifid, to_jsonb((SELECT d FROM (SELECT scientificname, recordedby) d)) || jsonb '{\"sci\":null}' || jsonb '{\"rec\":null}' AS data\nFROM explore.gbif limit 10\n)\nSELECT *\nFROM a\nWHERE (data ->> 'scientificname' in ('$scientificname') and data ->> 'sci' is null) = CASE WHEN NULLIF(TRIM(CONCAT('$scientificname')), '') is null THEN not true ELSE true END\nAND (data ->> 'recordedby' in ('$locality') and data ->> 'rec' is null) = CASE WHEN NULLIF(TRIM(CONCAT('$locality')), '') is null THEN not true ELSE true END",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "scientificname totals",
+      "type": "table"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": null
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 53,
+      "links": [],
+      "options": {
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "set search_path to explore,public;\n\nSELECT topn_scientificname\nFROM explore.cube\nWHERE $__timeFilter(time)\nAND grouping_centro_id = 0\nAND grouping_time = 0\n--AND EXISTS (SELECT 1 WHERE NULLIF(TRIM(CONCAT('$scientificname')), '') IS NULL)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), centro_id)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT time, scientificname, locality FROM explore.grouped\nWHERE $__timeFilter(time)\n--AND grouping_time = 0\n--AND grouping_centro_id = 0\n--AND grouping_cluster_id = 0\n--AND grouping_locality = 0--CASE WHEN NULLIF(TRIM(CONCAT($locality)), '') is null THEN 1 ELSE 0 END\n--AND grouping_scientificname = 0--CASE WHEN NULLIF(TRIM(CONCAT($scientificname)), '') is null THEN 1 ELSE 0 END\nAND scientificname % '$scientificname' --OR NULLIF(TRIM(CONCAT($scientificname)), '') IS null) \nAND locality % ($locality) OR NULLIF(TRIM(CONCAT('$locality')), '') IS null)\nLIMIT 100;",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "rawSql": "SELECT gbifid, eventdate, catalognumber, scientificname, occurrenceid, recordedby, sex, preparations, locality\nFROM explore.grouped\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (data ->> 'scientificname' in ('$scientificname') and data ->> 'sci' is null) = CASE WHEN NULLIF(TRIM(CONCAT('$scientificname')), '') is null THEN not true ELSE true END\nAND (data ->> 'recordedby' in ('$recordedby') and data ->> 'rec' is null) = CASE WHEN NULLIF(TRIM(CONCAT('$recordedby')), '') is null THEN not true ELSE true END\nORDER BY 2,1 DESC\nLIMIT 10",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Table explore.cube",
+      "type": "table"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "PostgreSQL",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -121,32 +2130,37 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
-        "x": 12,
-        "y": 0
+        "x": 0,
+        "y": 31
       },
       "hiddenSeries": false,
-      "id": 4,
+      "id": 39,
       "legend": {
+        "alignAsTable": true,
         "avg": false,
         "current": false,
-        "max": false,
+        "max": true,
         "min": false,
+        "rightSide": true,
         "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
-        "values": false
+        "values": true
       },
-      "lines": false,
+      "lines": true,
       "linewidth": 1,
+      "links": [],
       "nullPointMode": "null",
       "options": {
         "alertThreshold": true
       },
       "percentage": false,
       "pluginVersion": "7.5.4",
-      "pointradius": 1,
-      "points": true,
+      "pointradius": 0.5,
+      "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
@@ -156,9 +2170,11 @@
         {
           "format": "time_series",
           "group": [],
+          "hide": true,
           "metricColumn": "none",
+          "queryType": "randomWalk",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*), $__time(eventdate)\n  --$__timeGroup(\"date\",'60m')\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.scientificname ON gbif.scientificname_id = scientificname.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (scientificname.name % '$scientificname' OR NULLIF('$scientificname', '') IS null)\nGROUP BY 2\nORDER BY 2 ASC",
+          "rawSql": "set search_path to explore;\n\nWITH a AS (\nSELECT * FROM explore.grouping5\nWHERE\ngrouping_locality = CASE WHEN NULLIF(TRIM(CONCAT($locality)), '') is null THEN 1 ELSE 0 END AND\n--grouping_scientificname = CASE WHEN NULLIF(TRIM(CONCAT($scientificname)), '') is null THEN 1 ELSE 0 END AND\ngrouping_scientificname = 0 AND\ngrouping_y = CASE WHEN NULLIF(TRIM(CONCAT($year)), '') is null THEN 1 ELSE 0 END AND\ngrouping_m = CASE WHEN NULLIF(TRIM(CONCAT($month)), '') is null THEN 1 ELSE 0 END\nAND (scientificname IN ($scientificname) OR NULLIF(TRIM(CONCAT($scientificname)), '') IS null)\nAND (locality IN ($locality) OR NULLIF(TRIM(CONCAT($locality)), '') IS null)\nAND (y IN ($year) OR NULLIF(TRIM(CONCAT($year)), '') IS null)\nAND (m IN ($month) OR NULLIF(TRIM(CONCAT($month)), '') IS null)\n--AND $__timeFilter(make_date(y, m, '1'))\\n--AND y is not null\n--ORDER BY y,m,count\n)\nSELECT make_date(y,COALESCE(m,1),'1') AS time, count(distinct scientificname)\n--hll_cardinality(hll_union_agg(distinct_scientificname)) \nFROM a\nWHERE y is not null\n--scientificname is not null\ngroup by 1\norder by 1;\n--LIMIT 100;",
           "refId": "A",
           "select": [
             [
@@ -184,7 +2200,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Count",
+      "title": "Top 3 province per month",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -222,48 +2238,62 @@
       }
     },
     {
-      "datasource": null,
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PostgreSQL",
       "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "filterable": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
+        "defaults": {},
         "overrides": []
       },
+      "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
-        "w": 6,
+        "w": 12,
         "x": 12,
-        "y": 6
+        "y": 31
       },
-      "id": 8,
+      "hiddenSeries": false,
+      "id": 40,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
       "options": {
-        "showHeader": true
+        "alertThreshold": true
       },
+      "percentage": false,
       "pluginVersion": "7.5.4",
+      "pointradius": 0.5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
-          "format": "table",
+          "format": "time_series",
           "group": [],
+          "hide": true,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*), recordedby\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id \nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
+          "rawSql": "WITH a AS (\nSELECT scientificname, make_date(y,COALESCE(m,1),'1') AS time, sum(count) AS total FROM explore.grouping5 WHERE\ngrouping_locality = CASE WHEN NULLIF(TRIM(CONCAT($locality)), '') is null THEN 1 ELSE 0 END AND\n--grouping_scientificname = CASE WHEN NULLIF(TRIM(CONCAT($scientificname)), '') is null THEN 1 ELSE 0 END AND\ngrouping_scientificname = 0 AND\ngrouping_y = CASE WHEN NULLIF(TRIM(CONCAT($year)), '') is null THEN 1 ELSE 0 END AND\ngrouping_m = CASE WHEN NULLIF(TRIM(CONCAT($month)), '') is null THEN 1 ELSE 0 END\nAND (scientificname IN ($scientificname) OR NULLIF(TRIM(CONCAT($scientificname)), '') IS null)\nAND (locality IN ($locality) OR NULLIF(TRIM(CONCAT($locality)), '') IS null)\nAND (y IN ($year) OR NULLIF(TRIM(CONCAT($year)), '') IS null)\nAND (m IN ($month) OR NULLIF(TRIM(CONCAT($month)), '') IS null)\nGROUP BY 1,2\n--ORDER BY time ASC\n), b as (\nSELECT scientificname, total, time, row_number() OVER w as rownumber\nFROM a\nWINDOW w as (PARTITION BY time ORDER BY total desc))\nSELECT time, scientificname, total FROM b\nWHERE rownumber < 4\nAND scientificname is not null\nAND time is not null;\n",
           "refId": "A",
           "select": [
             [
@@ -285,54 +2315,105 @@
           ]
         }
       ],
+      "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "Recorded by",
-      "type": "table"
+      "title": "Total count",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
-      "datasource": null,
+      "aliasColors": {},
+      "bars": false,
+      "cacheTimeout": null,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PostgreSQL",
       "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "filterable": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
+        "defaults": {},
         "overrides": []
       },
+      "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
-        "w": 6,
-        "x": 18,
-        "y": 6
+        "w": 12,
+        "x": 12,
+        "y": 38
       },
-      "id": 9,
+      "hiddenSeries": false,
+      "id": 32,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "max",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
       "options": {
-        "showHeader": true
+        "alertThreshold": true
       },
+      "percentage": false,
       "pluginVersion": "7.5.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
-          "format": "table",
+          "format": "time_series",
           "group": [],
+          "hide": true,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*), scientificname\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.scientificname ON gbif.scientificname_id = scientificname.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (scientificname.name % '$scientificname' OR NULLIF('$scientificname', '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
+          "rawSql": "WITH a AS (\nSELECT * FROM explore.grouping5\nWHERE\ngrouping_locality = CASE WHEN NULLIF(TRIM(CONCAT($locality)), '') is null THEN 1 ELSE 0 END AND\ngrouping_scientificname = CASE WHEN NULLIF(TRIM(CONCAT($scientificname)), '') is null THEN 1 ELSE 0 END AND\ngrouping_y = CASE WHEN NULLIF(TRIM(CONCAT($year)), '') is null THEN 1 ELSE 0 END AND\ngrouping_m = CASE WHEN NULLIF(TRIM(CONCAT($month)), '') is null THEN 1 ELSE 0 END\nAND (scientificname IN ($scientificname) OR NULLIF(TRIM(CONCAT($scientificname)), '') IS null)\nAND (locality IN ($locality) OR NULLIF(TRIM(CONCAT($locality)), '') IS null)\nAND (y IN ($year) OR NULLIF(TRIM(CONCAT($year)), '') IS null)\nAND (m IN ($month) OR NULLIF(TRIM(CONCAT($month)), '') IS null)\n--AND $__timeFilter(make_date(y, m, '1'))\n--AND y is not null\n--ORDER BY y,m,count\n)\nSELECT make_date(y,COALESCE(m,1),'1') AS time, scientificname, sum(count) FROM a\nWHERE y is not null\nAND\ngrouping_scientificname = 0\n--scientificname is not null\ngroup by 1,2\norder by 1;\n--LIMIT 100;",
           "refId": "A",
           "select": [
             [
@@ -354,93 +2435,46 @@
           ]
         }
       ],
+      "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "Scientific name",
-      "type": "table"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": null,
-            "filterable": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
+      "title": "Distinct scientificname",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "gbifid"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": null
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "id": 6,
-      "options": {
-        "showHeader": true,
-        "sortBy": []
-      },
-      "pluginVersion": "7.5.4",
-      "targets": [
         {
-          "format": "table",
-          "group": [],
-          "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT eventdate, gbifid, catalognumber, scientificname, recordedby, occurrenceid, locality\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.scientificname ON gbif.scientificname_id = scientificname.id\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (scientificname.name % '$scientificname' OR NULLIF('$scientificname', '') IS null)\nORDER BY 1 DESC\nLIMIT 100",
-          "refId": "A",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "column"
-              }
-            ]
-          ],
-          "timeColumn": "time",
-          "where": [
-            {
-              "name": "$__timeFilter",
-              "params": [],
-              "type": "macro"
-            }
-          ]
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Table",
-      "type": "table"
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": false,
@@ -450,52 +2484,12 @@
   "templating": {
     "list": [
       {
-        "description": null,
-        "error": null,
-        "hide": 2,
-        "label": null,
-        "name": "minLat",
-        "query": "1",
-        "skipUrlSync": false,
-        "type": "constant"
-      },
-      {
-        "description": null,
-        "error": null,
-        "hide": 2,
-        "label": null,
-        "name": "maxLat",
-        "query": "2",
-        "skipUrlSync": false,
-        "type": "constant"
-      },
-      {
-        "description": null,
-        "error": null,
-        "hide": 2,
-        "label": null,
-        "name": "minLon",
-        "query": "3",
-        "skipUrlSync": false,
-        "type": "constant"
-      },
-      {
-        "description": null,
-        "error": null,
-        "hide": 2,
-        "label": null,
-        "name": "maxLon",
-        "query": "4",
-        "skipUrlSync": false,
-        "type": "constant"
-      },
-      {
         "current": {
           "selected": false,
           "text": "",
           "value": ""
         },
-        "description": "Full text search",
+        "description": null,
         "error": null,
         "hide": 0,
         "label": "Search",
@@ -517,7 +2511,7 @@
           "text": "",
           "value": ""
         },
-        "description": "Text search",
+        "description": null,
         "error": null,
         "hide": 0,
         "label": "Scientific name",
@@ -539,7 +2533,7 @@
           "text": "",
           "value": ""
         },
-        "description": "Text search",
+        "description": null,
         "error": null,
         "hide": 0,
         "label": "Recorded by",
@@ -554,16 +2548,102 @@
         "query": "",
         "skipUrlSync": false,
         "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "label": "Locality",
+        "name": "locality",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "description": null,
+        "error": null,
+        "hide": 2,
+        "label": null,
+        "name": "maxLon",
+        "query": "1",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "description": null,
+        "error": null,
+        "hide": 2,
+        "label": null,
+        "name": "minLat",
+        "query": "2",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "description": null,
+        "error": null,
+        "hide": 2,
+        "label": "",
+        "name": "minLon",
+        "query": "3",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "description": null,
+        "error": null,
+        "hide": 2,
+        "label": null,
+        "name": "maxLat",
+        "query": "4",
+        "skipUrlSync": false,
+        "type": "constant"
       }
     ]
   },
   "time": {
-    "from": "now-50y",
+    "from": "now-25y",
     "to": "now"
   },
-  "timepicker": {},
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
   "timezone": "",
-  "title": "Explore a GBIF dataset",
-  "uid": "oOYHGFTMz",
-  "version": 1
+  "title": "Explore a GBIF dataset - Botany",
+  "uid": "Apr6jom7k",
+  "version": 2
 }
