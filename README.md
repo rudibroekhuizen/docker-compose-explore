@@ -1,5 +1,7 @@
 # Explore a GBIF dataset
 
+## Description
+Grafana dashboard with interactive map to explore a GBIF dataset. Debezium sync to Elasticsearch. Database size: 2821 MB. 
 
 ## How to use
 Clone this repo:
