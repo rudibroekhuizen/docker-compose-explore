@@ -41,6 +41,6 @@ psql -d db1 -f 30-setup.sql
 psql -d db1 -f 40-normalize.sql
 ```
 
-![map_es](map_es.png?raw=true)
-![map_grafana](map_grafana.png?raw=true)
+![](map_es.png | width=100)
+![](map_grafana.png | width=100)
 
