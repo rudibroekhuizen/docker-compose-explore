@@ -41,5 +41,6 @@ psql -d db1 -f 30-setup.sql
 psql -d db1 -f 40-normalize.sql
 ```
 
+## Images
 <img src="map_es.png" width="600">
 <img src="map_grafana.png" width="600">
