@@ -15,20 +15,19 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1611687298678,
+  "id": 1,
+  "iteration": 1627391544169,
   "links": [],
   "panels": [
     {
       "datasource": null,
       "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
+        "defaults": {},
         "overrides": []
       },
       "gridPos": {
         "h": 13,
-        "w": 12,
+        "w": 10,
         "x": 0,
         "y": 0
       },
@@ -42,6 +41,7 @@
           "reverse": false,
           "weight": 5
         },
+        "discardZeroOrNull": true,
         "heat": {
           "fitBoundsOnLoad": false,
           "fitBoundsOnUpdate": false
@@ -54,19 +54,20 @@
           "radiusRangeTo": 12
         },
         "map": {
-          "centerLatitude": 0,
-          "centerLongitude": 0,
+          "centerLatitude": 32,
+          "centerLongitude": 10,
+          "tileUrlSchema": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
           "useBoundsInQuery": true,
           "useCenterFromFirstPos": false,
           "useCenterFromLastPos": false,
-          "zoom": 2,
+          "zoom": 1.5,
           "zoomToDataBounds": false
         },
         "marker": {
           "alwaysShowTooltips": false,
           "showOnlyLastMarker": false,
-          "size": 25,
-          "sizeLast": 25,
+          "size": 20,
+          "sizeLast": 20,
           "useSecondaryIconForAllMarkers": false,
           "useSecondaryIconForLastMarker": false
         },
@@ -80,8 +81,35 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH a AS (\nSELECT\neventdate AS time,\ndecimallatitude,\ndecimallongitude,\ngeom,\nCOUNT(*) OVER() AS cnt\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\n), b AS (\nSELECT\ntime,\ndecimallatitude,\ndecimallongitude,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 150)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(decimallatitude) AS latitude,\nAVG(decimallongitude) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "WITH a AS (\nSELECT\ngeom, gbifid,\nCOUNT(gbifid) OVER() AS cnt\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.multimedia b USING (gbifid)\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n--AND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND (b.type IN ($multimedia) OR NULLIF(TRIM(CONCAT($multimedia)), '') IS null)\n), b AS (\nSELECT\ngeom, gbifid,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT clusters,\nCOUNT(DISTINCT gbifid) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "format": "table",
+          "group": [],
+          "hide": true,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH a AS (\nSELECT\ngeom,\nCOUNT(gbifid) OVER() AS cnt\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.multimedia b USING (gbifid)\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n--AND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND (b.type IN ($multimedia) OR NULLIF(TRIM(CONCAT($multimedia)), '') IS null)\n), b AS (\nSELECT\ngeom,\nST_ClusterKMeans(geom, LEAST(cnt::integer, 100)) OVER() AS clusters\nFROM a\n)\nSELECT\nclusters,\nCOUNT(clusters) AS tooltip,\nAVG(ST_Y (ST_Transform (geom, 4326))) AS latitude,\nAVG(ST_X (ST_Transform (geom, 4326))) AS longitude\nFROM b\nGROUP BY 1\nORDER BY 1;",
+          "refId": "B",
           "select": [
             [
               {
@@ -114,17 +142,15 @@
       "dashes": false,
       "datasource": null,
       "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
+        "defaults": {},
         "overrides": []
       },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 14,
+        "x": 10,
         "y": 0
       },
       "hiddenSeries": false,
@@ -145,7 +171,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.2",
+      "pluginVersion": "7.5.4",
       "pointradius": 1,
       "points": true,
       "renderer": "flot",
@@ -159,7 +185,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  count(*), $__time(eventdate)\n  --$__timeGroup(\"date\",'60m')\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nGROUP BY 2\nORDER BY 2 ASC",
+          "rawSql": "SELECT COUNT(DISTINCT gbifid), \n  $__time(eventdate)\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.multimedia b USING (gbifid)\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n--AND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND (b.type IN ($multimedia) OR NULLIF(TRIM(CONCAT($multimedia)), '') IS null)\nGROUP BY 2\n--ORDER BY 2 ASC",
           "refId": "A",
           "select": [
             [
@@ -249,22 +275,22 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 6,
-        "x": 12,
+        "w": 5,
+        "x": 10,
         "y": 6
       },
       "id": 8,
       "options": {
         "showHeader": true
       },
-      "pluginVersion": "7.3.2",
+      "pluginVersion": "7.5.4",
       "targets": [
         {
           "format": "table",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  count(*), recordedby\nFROM\n  explore.gbif\nWHERE $__timeFilter(eventdate)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND recordedby IS NOT NULL\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
+          "rawSql": "SELECT COUNT(DISTINCT gbifid), recordedby\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.multimedia b USING (gbifid)\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n--AND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND (b.type IN ($multimedia) OR NULLIF(TRIM(CONCAT($multimedia)), '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
           "refId": "A",
           "select": [
             [
@@ -318,22 +344,91 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 6,
-        "x": 18,
+        "w": 5,
+        "x": 15,
         "y": 6
       },
-      "id": 9,
+      "id": 10,
       "options": {
         "showHeader": true
       },
-      "pluginVersion": "7.3.2",
+      "pluginVersion": "7.5.4",
       "targets": [
         {
           "format": "table",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  count(*), preparations\nFROM\n  explore.gbif\nWHERE $__timeFilter(eventdate)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND recordedby IS NOT NULL\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
+          "rawSql": "SELECT COUNT(DISTINCT gbifid), scientificname\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.multimedia b USING (gbifid)\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n--AND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND (b.type IN ($multimedia) OR NULLIF(TRIM(CONCAT($multimedia)), '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Scientificname",
+      "type": "table"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 20,
+        "y": 6
+      },
+      "id": 9,
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "7.5.4",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT gbifid), preparations\nFROM explore.gbif\nLEFT JOIN explore.recordedby ON gbif.recordedby_id = recordedby.id\nLEFT JOIN explore.multimedia b USING (gbifid)\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n--AND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND (b.type IN ($multimedia) OR NULLIF(TRIM(CONCAT($multimedia)), '') IS null)\nGROUP BY 2\nORDER BY 1 DESC\nLIMIT 10",
           "refId": "A",
           "select": [
             [
@@ -387,19 +482,31 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "gbifid"
+              "options": "image_urls"
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": null
+                "id": "custom.displayMode",
+                "value": "json-view"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "image"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "image"
               }
             ]
           }
         ]
       },
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 24,
         "x": 0,
         "y": 13
@@ -407,16 +514,21 @@
       "id": 6,
       "options": {
         "showHeader": true,
-        "sortBy": []
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "eventdate"
+          }
+        ]
       },
-      "pluginVersion": "7.3.2",
+      "pluginVersion": "7.5.4",
       "targets": [
         {
           "format": "table",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT *\nFROM explore.gbif\nWHERE $__timeFilter(eventdate)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND decimallatitude >= $minLat\nAND decimallatitude <= $maxLat\nAND decimallongitude >= $minLon\nAND decimallongitude <= $maxLon\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nORDER BY eventdate DESC\nLIMIT 100",
+          "rawSql": "SELECT a.gbifid, a.eventdate, a.scientificname, a.catalognumber, a.occurrenceid, a.recordedby, a.preparations, a.locality, \n(array_agg(b.identifier))[1] AS image, to_jsonb(array_agg(b.identifier)) AS image_urls\nFROM explore.gbif a\nLEFT JOIN explore.recordedby ON a.recordedby_id = recordedby.id\nLEFT JOIN explore.multimedia b USING (gbifid)\nWHERE $__timeFilter(eventdate)\nAND ST_Contains(st_geometryfromtext('POLYGON(($maxLon $minLat, $maxLon $maxLat, $minLon $maxLat, $minLon $minLat,$maxLon $minLat))',4326), geom)\nAND (tsv @@ websearch_to_tsquery('simple', '$search') OR NULLIF('$search', '') IS null)\nAND (tsv_recordedby @@ websearch_to_tsquery('simple', '$recordedby') OR NULLIF('$recordedby', '') IS null)\n--AND (recordedby.name % '$recordedby' OR NULLIF('$recordedby', '') IS null)\nAND (tsv_scientificname @@ websearch_to_tsquery('simple', '$scientificname') OR NULLIF('$scientificname', '') IS null)\nAND (preparations IN ($preparations) OR NULLIF(TRIM(CONCAT($preparations)), '') IS null)\nAND (b.type IN ($multimedia) OR NULLIF(TRIM(CONCAT($multimedia)), '') IS null)\nGROUP BY 1\nORDER BY eventdate DESC\nLIMIT 100",
           "refId": "A",
           "select": [
             [
@@ -445,91 +557,47 @@
     }
   ],
   "refresh": false,
-  "schemaVersion": 26,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": -79.17133464081945,
-          "value": -79.17133464081945
-        },
+        "description": null,
         "error": null,
         "hide": 2,
         "label": null,
         "name": "minLat",
-        "options": [
-          {
-            "selected": false,
-            "text": "1",
-            "value": "1"
-          }
-        ],
         "query": "1",
         "skipUrlSync": false,
         "type": "constant"
       },
       {
-        "current": {
-          "selected": false,
-          "text": 84.54136107313408,
-          "value": 84.54136107313408
-        },
+        "description": null,
         "error": null,
         "hide": 2,
         "label": null,
         "name": "maxLat",
-        "options": [
-          {
-            "selected": false,
-            "text": "2",
-            "value": "2"
-          }
-        ],
         "query": "2",
         "skipUrlSync": false,
         "type": "constant"
       },
       {
-        "current": {
-          "selected": false,
-          "text": -285.46875000000006,
-          "value": -285.46875000000006
-        },
+        "description": null,
         "error": null,
         "hide": 2,
         "label": null,
         "name": "minLon",
-        "options": [
-          {
-            "selected": false,
-            "text": "3",
-            "value": "3"
-          }
-        ],
         "query": "3",
         "skipUrlSync": false,
         "type": "constant"
       },
       {
-        "current": {
-          "selected": false,
-          "text": 322.03125000000006,
-          "value": 322.03125000000006
-        },
+        "description": null,
         "error": null,
         "hide": 2,
         "label": null,
         "name": "maxLon",
-        "options": [
-          {
-            "selected": false,
-            "text": "4",
-            "value": "4"
-          }
-        ],
         "query": "4",
         "skipUrlSync": false,
         "type": "constant"
@@ -540,6 +608,7 @@
           "text": "",
           "value": ""
         },
+        "description": "Full text search",
         "error": null,
         "hide": 0,
         "label": "Search",
@@ -556,10 +625,53 @@
         "type": "textbox"
       },
       {
-        "allValue": "null",
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "description": "Text search",
+        "error": null,
+        "hide": 0,
+        "label": "Recorded by",
+        "name": "recordedby",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
         "current": {
           "selected": true,
-          "tags": [],
+          "text": "",
+          "value": ""
+        },
+        "description": "Text search",
+        "error": null,
+        "hide": 0,
+        "label": "Scientificname",
+        "name": "scientificname",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "allValue": "null",
+        "current": {
+          "selected": false,
           "text": [
             "All"
           ],
@@ -569,6 +681,7 @@
         },
         "datasource": "PostgreSQL",
         "definition": "SELECT DISTINCT preparations FROM explore.gbif ORDER BY 1",
+        "description": null,
         "error": null,
         "hide": 0,
         "includeAll": true,
@@ -586,16 +699,49 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": "null",
+        "current": {
+          "selected": true,
+          "tags": [],
+          "text": [
+            "StillImage"
+          ],
+          "value": [
+            "StillImage"
+          ]
+        },
+        "datasource": "PostgreSQL",
+        "definition": "SELECT DISTINCT type FROM explore.multimedia ORDER BY 1",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": "Multimedia",
+        "multi": true,
+        "name": "multimedia",
+        "options": [],
+        "query": "SELECT DISTINCT type FROM explore.multimedia ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "1779-12-31T23:40:28.000Z",
-    "to": "2020-12-31T23:00:00.000Z"
+    "from": "1679-12-31T23:00:00.000Z",
+    "to": "2021-12-31T23:00:00.000Z"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Explore a GBIF dataset",
   "uid": "oOYHGFTMz",
-  "version": 2
+  "version": 1
 }

@@ -6,3 +6,6 @@ unzip /tmp/0107080-200613084148143.zip -d /tmp
 
 # Remove headerline from occurence.txt
 tail -n +2 /tmp/occurrence.txt > /tmp/gbif_raw.tsv
+
+# Remove headerline from multimedia.txt
+tail -n +2 /tmp/multimedia.txt > /tmp/multimedia_raw.tsv

@@ -1,5 +1,7 @@
 # Explore a GBIF dataset
 
+## Description
+Grafana dashboard with interactive map to explore a GBIF dataset. Debezium sync to Elasticsearch. Database size: 2821 MB. 
 
 ## How to use
 Clone this repo:
@@ -31,9 +33,14 @@ Browse to http://localhost:5601 in your browser to use the Kibana dashboard.
 ## Load manually
 ```
 git clone https://github.com/rudibroekhuizen/docker-compose-explore /tmp
+cd docker-compose-explore/postgres/docker-entrypoint-initdb.d
 chmod +x 20-setup.sh
 ./20-setup.sh
 su postgres
 psql -d db1 -f 30-setup.sql
 psql -d db1 -f 40-normalize.sql
 ```
+
+## Screenshots
+<img src="map_es.png" width="600">
+<img src="map_grafana.png" width="600">

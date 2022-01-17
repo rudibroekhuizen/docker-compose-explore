@@ -40,6 +40,7 @@ services:
     volumes:
       - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - ./postgres/conf.d:/conf.d
+      # - /data/postgresql:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -66,7 +67,7 @@ services:
       - "5601:5601"
 
   grafana:
-    image: grafana/grafana:7.3.2
+    image: grafana/grafana:7.5.4
     ports:
       - "3000:3000"
     volumes:

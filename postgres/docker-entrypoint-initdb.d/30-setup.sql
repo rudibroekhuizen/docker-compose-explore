@@ -1,10 +1,13 @@
 START TRANSACTION;
 
+-- Security best practice; avoid creation of objects in schema 'public'
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+
 -- Create schema
 CREATE SCHEMA IF NOT EXISTS explore;
 
 -- Create table
-CREATE TABLE explore.gbif_raw (
+CREATE UNLOGGED TABLE explore.gbif_raw (
 	gbifid DECIMAL, 
 	abstract BOOLEAN, 
 	accessrights BOOLEAN, 
@@ -507,9 +510,6 @@ ALTER TABLE explore.gbif_raw ALTER COLUMN "level2name" TYPE text;
 ALTER TABLE explore.gbif_raw ALTER COLUMN "level3gid" TYPE text;
 ALTER TABLE explore.gbif_raw ALTER COLUMN "level3name" TYPE text;
 
--- Set to unlogged
-ALTER TABLE explore.gbif_raw SET UNLOGGED;
-
 -- Load data into table
 COPY explore.gbif_raw FROM '/tmp/gbif_raw.tsv' DELIMITER E'\t';
 
@@ -576,36 +576,59 @@ decimallatitude float,
 decimallongitude float,
 geom geometry(POINT,4326),
 location text,
-tsv tsvector
+tsv tsvector,
+tsv_recordedby tsvector,
+tsv_scientificname tsvector
 );
 
 -- Create indexes
 CREATE INDEX ON explore.gbif USING GIST (geom);
 CREATE INDEX ON explore.gbif USING BTREE (eventdate);
+CREATE INDEX ON explore.gbif USING GIST (tsv);  
+CREATE INDEX ON explore.gbif USING GIST (tsv_recordedby);  
+CREATE INDEX ON explore.gbif USING GIST (tsv_scientificname);  
+
+CREATE OR REPLACE FUNCTION create_tsv() RETURNS trigger AS $$
+begin
+  new.tsv :=
+  coalesce(to_tsvector('pg_catalog.simple', new.gbifid::text),'') ||
+ 	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.catalognumber,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.occurrenceid,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.sex,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.lifestage,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.preparations,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.locality,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.stateprovince,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.countrycode,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.higherclassification,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.kingdom,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.phylum,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.class,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.order,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.family,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.genus,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.specificepithet,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.species,'')),'') ||
+	coalesce(to_tsvector('pg_catalog.simple', coalesce(new.genericname,'')),'');
+  RETURN new;
+END
+$$ LANGUAGE plpgsql;
 
 -- Create trigger to generate tsvectors on insert
 CREATE TRIGGER create_tsv BEFORE INSERT OR UPDATE
+ON explore.gbif FOR EACH ROW EXECUTE PROCEDURE create_tsv();
+
+-- Create trigger to generate tsvectors on insert
+CREATE TRIGGER create_tsv_recordedby BEFORE INSERT OR UPDATE
 ON explore.gbif FOR EACH ROW EXECUTE FUNCTION
-tsvector_update_trigger(tsv, 'pg_catalog.simple', 
-catalognumber, 
-occurrenceid, 
-recordedby, 
-sex, 
-lifestage, 
-preparations, 
-locality, 
-stateprovince, 
-countrycode, 
-higherclassification, 
-kingdom, 
-phylum, 
-class, 
-"order", 
-family, 
-genus, 
-specificepithet,
-species,
-genericname,
+tsvector_update_trigger(tsv_recordedby, 'pg_catalog.simple', 
+recordedby
+);
+
+-- Create trigger to generate tsvectors on insert
+CREATE TRIGGER create_tsv_scientificname BEFORE INSERT OR UPDATE
+ON explore.gbif FOR EACH ROW EXECUTE FUNCTION
+tsvector_update_trigger(tsv_scientificname, 'pg_catalog.simple', 
 scientificname
 );
 
@@ -613,7 +636,9 @@ scientificname
 CREATE OR REPLACE function explore.update_geom() RETURNS TRIGGER AS 
 $$
   BEGIN 
-    NEW.geom := ST_SetSRID(ST_Makepoint(NEW.decimallongitude,NEW.decimallatitude),4326);
+    IF NEW.decimallatitude IS NOT NULL AND NEW.decimallongitude IS NOT NULL THEN
+      NEW.geom := ST_SetSRID(ST_Makepoint(NEW.decimallongitude,NEW.decimallatitude),4326);
+    END IF;
     RETURN NEW;
   END;
 $$ LANGUAGE 'plpgsql';
@@ -664,5 +689,9 @@ decimallatitude::float,
 decimallongitude::float
 FROM explore.gbif_raw
 );
+
+-- Set a value for empty geom and empty eventdate
+UPDATE explore.gbif SET geom = ST_SetSRID(ST_Makepoint(1,1),4326) WHERE geom IS NULL;
+UPDATE explore.gbif SET eventdate = '1690-01-01' WHERE eventdate IS NULL;
 
 COMMIT;
