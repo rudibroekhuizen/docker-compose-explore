@@ -614,7 +614,7 @@ begin
 END
 $$ LANGUAGE plpgsql;
 
--- Create trigger create tsvectors
+-- Create trigger to generate tsvectors on insert
 CREATE TRIGGER create_tsv BEFORE INSERT OR UPDATE
 ON explore.gbif FOR EACH ROW EXECUTE PROCEDURE create_tsv();
 
