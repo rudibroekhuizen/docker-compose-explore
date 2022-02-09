@@ -48,7 +48,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.1
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:${EK_VERSION}
     ports:
       - "9200:9200"
     expose: 
@@ -61,14 +61,14 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
 
   kibana:
-    image: docker.elastic.co/kibana/kibana-oss:7.6.1
+    image: docker.elastic.co/kibana/kibana-oss:${EK_VERSION}
     links:
       - elasticsearch
     ports:
       - "5601:5601"
 
   grafana:
-    image: grafana/grafana:7.5.15
+    image: grafana/grafana:${GRAFANA_VERSION}
     ports:
       - "3000:3000"
     volumes:
