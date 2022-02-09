@@ -47,7 +47,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.1
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
     ports:
       - "9200:9200"
     expose: 
@@ -60,7 +60,7 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
 
   kibana:
-    image: docker.elastic.co/kibana/kibana-oss:7.6.1
+    image: docker.elastic.co/kibana/kibana-oss:7.10.2
     links:
       - elasticsearch
     ports:
