@@ -67,7 +67,7 @@ services:
       - "5601:5601"
 
   grafana:
-    image: grafana/grafana:7.5.4
+    image: grafana/grafana:7.5.15
     ports:
       - "3000:3000"
     volumes:
